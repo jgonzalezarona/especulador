@@ -69,10 +69,10 @@
                 <label class="text-xs text-slate-400 font-semibold">Mercado:</label>
                 <select id="filter-market" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 focus:ring-emerald-500">
                     <option value="TODOS">Todos los Índices</option>
-                    <option value="SP500">S&P 500</option>
-                    <option value="NDX">Nasdaq 100</option>
-                    <option value="IBEX35">IBEX 35</option>
-                    <option value="DAX40">DAX 40</option>
+                    <option value="SP500">S&P 500 (SP500)</option>
+                    <option value="NDX">Nasdaq 100 (NDX)</option>
+                    <option value="IBEX35">IBEX 35 (IBEX35)</option>
+                    <option value="DAX40">DAX 40 (DAX40)</option>
                 </select>
 
                 <label class="text-xs text-slate-400 font-semibold ml-2">Setup:</label>
@@ -83,10 +83,10 @@
                 </select>
 
                 <label class="text-xs text-slate-400 font-semibold ml-2">RS Min:</label>
-                <input type="number" id="filter-rs" value="50" min="0" max="100" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
+                <input type="number" id="filter-rs" value="0" min="0" max="100" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
 
                 <label class="text-xs text-slate-400 font-semibold ml-2">ADR Min (%):</label>
-                <input type="number" id="filter-adr" value="1.5" step="0.5" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
+                <input type="number" id="filter-adr" value="0" step="0.5" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
             </div>
 
             <div class="relative w-full sm:w-64">
@@ -152,7 +152,6 @@
                 </button>
             </div>
 
-            <!-- Resumen Global -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6" id="backtest-kpis">
                 <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
                     <div class="text-[10px] text-slate-400 font-semibold uppercase">Win Rate (Acierto)</div>
@@ -172,7 +171,6 @@
                 </div>
             </div>
 
-            <!-- Tabla por Terciles de ADR -->
             <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-layer-group text-amber-400"></i> Desglose por Terciles de Volatilidad (ADR%)
             </h3>
@@ -190,7 +188,6 @@
                         </tr>
                     </thead>
                     <tbody id="backtest-terciles-body" class="divide-y divide-slate-800 font-mono">
-                        <!-- Filas dinámicas -->
                     </tbody>
                 </table>
             </div>
@@ -231,7 +228,6 @@
                     cargarGraficoTradingView(datosFiltrados[0].tv || datosFiltrados[0].ticker);
                 }
 
-                // Cargar datos del backtest en segundo plano
                 cargarBacktestData();
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
@@ -290,7 +286,9 @@
             const search = document.getElementById('search-input').value.toUpperCase();
 
             datosFiltrados = datosGlobales.filter(item => {
-                const matchMarket = marketFilter === 'TODOS' || item.market === marketFilter;
+                // Comprobación flexible del mercado (coincide con SP500, NDX, IBEX35, DAX40)
+                const itemMarket = (item.market || '').toUpperCase();
+                const matchMarket = marketFilter === 'TODOS' || itemMarket === marketFilter.toUpperCase();
                 
                 let matchSetup = true;
                 if (setupFilter === 'SETUP_A') matchSetup = item.setup_a;
@@ -312,7 +310,7 @@
             tbody.innerHTML = '';
 
             if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No hay valores que cumplan con los filtros.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No hay candidatos en este índice que cumplan actualmente las 5 reglas del Trend Template de Minervini.</td></tr>`;
                 return;
             }
 
