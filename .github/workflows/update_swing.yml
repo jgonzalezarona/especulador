@@ -1,0 +1,35 @@
+name: Actualizador Automatico Especulador
+
+on:
+  schedule:
+    # 13:30 UTC, 17:30 UTC, 21:30 UTC de Lunes a Viernes
+    - cron: '30 13,17,21 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  build-and-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install yfinance pandas lxml requests beautifulsoup4
+
+      - name: Ejecutar Scanner Swing
+        run: python fetcher_swing.py
+
+      - name: Guardar y publicar cambios en GitHub
+        run: |
+          git config --global user.name "especulador-bot"
+          git config --global user.email "bot@especulador.local"
+          git add swing_data.json
+          git commit -m "Precios y setups actualizados en background [skip ci]" || exit 0
+          git push
