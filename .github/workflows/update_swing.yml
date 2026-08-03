@@ -2,6 +2,7 @@ name: Actualizador Automatico Especulador
 
 on:
   schedule:
+    # 13:30 UTC, 17:30 UTC, 21:30 UTC de Lunes a Viernes
     - cron: '30 13,17,21 * * 1-5'
   workflow_dispatch:
 
@@ -29,7 +30,7 @@ jobs:
         run: python fetcher_swing.py
 
       - name: Ejecutar Backtest de Medias
-        run: python backtest_medias.py || echo "Backtest completado con avisos"
+        run: python backtest_medias.py
 
       - name: Guardar y publicar cambios en GitHub
         run: |
