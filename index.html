@@ -1,395 +1,561 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>especulador | Swing & Breakout Screener</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome para iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background-color: #0f172a; color: #f8fafc; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .setup-a { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
-        .setup-b { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swing Scanner — Embudo especulativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://s3.tradingview.com/tv.js"></script>
+<style>
+  :root{
+    --bg:#0F151E; --panel:#161F2B; --panel2:#1B2634; --line:#24303E;
+    --txt:#DCE6F2; --dim:#7D8FA5; --amber:#F2A93B; --green:#38D399;
+    --red:#FF6161; --blue:#5CA8FF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:'IBM Plex Mono', monospace; font-size:13px;
+    display:flex; flex-direction:column;
+  }
+  h1,h2,h3,.disp{font-family:'Barlow Condensed', sans-serif; letter-spacing:.02em}
+  button{font-family:inherit}
+  a{color:var(--blue)}
+
+  /* ---------- cabecera ---------- */
+  header{
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    padding:14px 20px; border-bottom:1px solid var(--line);
+  }
+  header h1{font-size:26px; font-weight:700; text-transform:uppercase}
+  header h1 span{color:var(--amber)}
+  #meta{color:var(--dim); font-size:12px}
+  #loadWrap{margin-left:auto; display:flex; gap:10px; align-items:center}
+  .btn{
+    background:var(--panel2); color:var(--txt); border:1px solid var(--line);
+    padding:7px 14px; border-radius:4px; cursor:pointer; font-size:12px;
+  }
+  .btn:hover{border-color:var(--amber)}
+  .btn-green{background:rgba(56,211,153,.15); color:var(--green); border:1px solid var(--green)}
+  .btn-green:hover{background:rgba(56,211,153,.25); border-color:var(--green)}
+  .btn:focus-visible{outline:2px solid var(--amber); outline-offset:2px}
+
+  /* ---------- layout ---------- */
+  main{flex:1; display:flex; min-height:0}
+  /* EL EMBUDO — raíl de puertas */
+  #funnel{
+    width:280px; min-width:280px; border-right:1px solid var(--line);
+    padding:16px; overflow-y:auto;
+  }
+  #funnel h2{font-size:15px; text-transform:uppercase; color:var(--dim); margin-bottom:12px}
+  .gate{
+    position:relative; background:var(--panel); border:1px solid var(--line);
+    border-radius:5px; padding:10px 12px; margin-bottom:6px;
+  }
+  .gate::after{ /* conector del embudo */
+    content:""; position:absolute; left:50%; bottom:-7px; width:2px; height:7px;
+    background:var(--line);
+  }
+  .gate:last-of-type::after{display:none}
+  .gate .row1{display:flex; justify-content:space-between; align-items:center; gap:8px}
+  .gate label{font-size:12px; color:var(--txt); cursor:pointer; user-select:none}
+  .gate .count{
+    font-family:'Barlow Condensed'; font-size:20px; font-weight:700; color:var(--green);
+    min-width:44px; text-align:right;
+  }
+  .gate.off .count{color:var(--dim)}
+  .gate .cut{font-size:10px; color:var(--dim); text-align:right}
+  .gate input[type=number]{
+    width:64px; background:var(--bg); color:var(--amber); border:1px solid var(--line);
+    border-radius:3px; padding:3px 5px; font-family:inherit; font-size:12px; text-align:right;
+  }
+  .gate input[type=checkbox]{accent-color:var(--amber); margin-right:6px}
+  .gate .ctl{display:flex; align-items:center; gap:6px; margin-top:6px; font-size:11px; color:var(--dim)}
+  #mercados{display:flex; gap:10px; flex-wrap:wrap; margin:4px 0 14px}
+  #mercados label{font-size:11px; color:var(--dim); cursor:pointer}
+  #survivors{
+    margin-top:10px; text-align:center; font-family:'Barlow Condensed';
+    font-size:36px; font-weight:700; color:var(--amber);
+  }
+  #survivors small{display:block; font-size:12px; color:var(--dim); font-family:'IBM Plex Mono'; font-weight:400}
+
+  /* ---------- tabla ---------- */
+  #listWrap{flex:1; overflow:auto; min-width:0}
+  table{width:100%; border-collapse:collapse}
+  thead th{
+    position:sticky; top:0; background:var(--bg); z-index:2;
+    font-family:'Barlow Condensed'; font-size:13px; font-weight:600; text-transform:uppercase;
+    color:var(--dim); text-align:right; padding:10px 10px; border-bottom:1px solid var(--line);
+    cursor:pointer; white-space:nowrap;
+  }
+  thead th:first-child,thead th:nth-child(2){text-align:left}
+  tbody td{padding:8px 10px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap}
+  tbody td:first-child,tbody td:nth-child(2){text-align:left}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--panel)}
+  tbody tr.sel{background:var(--panel2)}
+  .tk{font-weight:600; color:var(--txt)}
+  .mkt{font-size:10px; color:var(--dim)}
+  .badge{
+    display:inline-block; font-size:10px; font-weight:600; padding:2px 6px;
+    border-radius:3px; margin-left:4px;
+  }
+  .bA{background:rgba(56,211,153,.15); color:var(--green); border:1px solid var(--green)}
+  .bB{background:rgba(92,168,255,.15); color:var(--blue); border:1px solid var(--blue)}
+  .ern-ok{color:var(--dim)} .ern-warn{color:var(--red); font-weight:600} .ern-unk{color:var(--amber)}
+  .spark{height:24px; width:90px; vertical-align:middle}
+  #empty{padding:40px; color:var(--dim); text-align:center; line-height:1.7}
+
+  /* ---------- detalle ---------- */
+  #detail{
+    width:0; min-width:0; border-left:1px solid var(--line); overflow-y:auto;
+    transition:width .15s ease; background:var(--panel);
+  }
+  #detail.open{width:46%; min-width:520px}
+  #dHead{display:flex; align-items:baseline; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line)}
+  #dHead h2{font-size:24px}
+  #dHead .mkt{font-size:12px}
+  #dClose{margin-left:auto}
+  #tvchart{height:420px; border-bottom:1px solid var(--line)}
+  #dGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line)}
+  .cell{background:var(--panel); padding:10px 12px}
+  .cell .k{font-size:10px; text-transform:uppercase; color:var(--dim)}
+  .cell .v{font-size:15px; font-weight:600; margin-top:2px}
+  .cell .v.g{color:var(--green)} .cell .v.a{color:var(--amber)} .cell .v.r{color:var(--red)}
+  #plan{padding:14px 16px; border-top:1px solid var(--line); font-size:12px; line-height:1.8; color:var(--dim)}
+  #plan b{color:var(--amber)}
+
+  /* ---------- modal backtest ---------- */
+  #modalBacktest{
+    position:fixed; inset:0; background:rgba(15,21,30,0.85); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; padding:20px; z-index:100;
+  }
+  #modalBacktest.open{display:flex}
+  .modal-box{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    width:100%; max-width:800px; max-height:90vh; overflow-y:auto; padding:24px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  }
+  .modal-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:14px}
+  .modal-head h2{font-size:22px; color:var(--green); text-transform:uppercase}
+  .modal-head p{font-size:11px; color:var(--dim); margin-top:2px}
+  .kpi-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px}
+  .kpi-card{background:var(--panel2); border:1px solid var(--line); padding:12px; border-radius:6px}
+  .kpi-card .lbl{font-size:10px; text-transform:uppercase; color:var(--dim)}
+  .kpi-card .val{font-family:'Barlow Condensed'; font-size:24px; font-weight:700; margin-top:4px}
+  .bt-tbl{width:100%; border-collapse:collapse; margin-bottom:20px}
+  .bt-tbl th{background:var(--panel2); padding:8px; font-size:11px; text-align:right; color:var(--dim); border-bottom:1px solid var(--line)}
+  .bt-tbl th:first-child{text-align:left}
+  .bt-tbl td{padding:8px; text-align:right; border-bottom:1px solid var(--line)}
+  .bt-tbl td:first-child{text-align:left; font-weight:600}
+
+  @media (max-width:1100px){
+    #detail.open{position:fixed; right:0; top:0; bottom:0; width:100%; min-width:0; z-index:10}
+    #funnel{width:230px; min-width:230px}
+  }
+  @media (prefers-reduced-motion:reduce){ #detail{transition:none} }
+</style>
 </head>
-<body class="p-4 md:p-8 font-sans">
+<body>
 
-    <!-- Header -->
-    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-slate-700 gap-4">
-        <div>
-            <h1 class="text-3xl font-bold text-emerald-400 flex items-center gap-3">
-                <i class="fa-solid fa-chart-line"></i> especulador
-            </h1>
-            <p class="text-slate-400 text-sm mt-1">Screener de Swing & Breakout (Diario) — Manual v1.0</p>
-        </div>
-        <div class="flex items-center gap-3">
-            <button onclick="abrirModalBacktest()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition flex items-center gap-2">
-                <i class="fa-solid fa-vial"></i> 📊 Ver Backtest
-            </button>
-            <div class="flex items-center gap-3 text-xs text-slate-400 glass-panel px-4 py-2 rounded-lg">
-                <div><i class="fa-regular fa-clock mr-1"></i> <span id="last-update" class="text-slate-200 font-semibold">Cargando...</span></div>
-                <button onclick="cargarDatos()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-1 rounded transition">
-                    <i class="fa-solid fa-rotate"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+<header>
+  <h1>Swing<span>Scanner</span></h1>
+  <div id="meta">Cargando swing_data.json...</div>
+  <div id="loadWrap">
+    <button class="btn btn-green" onclick="abrirModalBacktest()">📊 Ver Backtest</button>
+    <input type="file" id="file" accept=".json" hidden>
+    <button class="btn" onclick="document.getElementById('file').click()">Subir JSON manual</button>
+    <button class="btn" id="btnReset" title="Borra los datos guardados en este navegador">Vaciar</button>
+  </div>
+</header>
 
-    <!-- METRIC CARDS / CAJAS DE RESUMEN -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="glass-panel p-4 rounded-xl">
-            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Universo Filtrado</div>
-            <div class="text-3xl font-extrabold text-white mt-1" id="kpi-total">-</div>
-            <div class="text-xs text-slate-400 mt-1" id="kpi-total-sub">Cumplen Trend Template</div>
-        </div>
-        <div class="glass-panel p-4 rounded-xl border-l-4 border-emerald-500">
-            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Setup A (VCP / Rotura)</div>
-            <div class="text-3xl font-extrabold text-emerald-400 mt-1" id="kpi-setup-a">-</div>
-            <div class="text-xs text-slate-400 mt-1">Consolidación cerca de Pivote</div>
-        </div>
-        <div class="glass-panel p-4 rounded-xl border-l-4 border-blue-500">
-            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Setup B (Pullback EMA)</div>
-            <div class="text-3xl font-extrabold text-blue-400 mt-1" id="kpi-setup-b">-</div>
-            <div class="text-xs text-slate-400 mt-1">Retroceso a 10/21 EMA</div>
-        </div>
-        <div class="glass-panel p-4 rounded-xl">
-            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">ADR Medio Candidatos</div>
-            <div class="text-3xl font-extrabold text-amber-400 mt-1" id="kpi-adr">-</div>
-            <div class="text-xs text-slate-400 mt-1">Volatilidad Diaria Promedio</div>
-        </div>
-    </section>
+<main>
+  <!-- EL EMBUDO -->
+  <aside id="funnel">
+    <h2>Embudo de filtros</h2>
+    <div id="mercados"></div>
+    <div id="gates"></div>
+    <div id="survivors">—<small>supervivientes</small></div>
+  </aside>
 
-    <!-- PANEL DE FILTROS -->
-    <section class="glass-panel p-4 rounded-xl mb-6">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-3">
-                <label class="text-xs text-slate-400 font-semibold">Mercado:</label>
-                <select id="filter-market" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 focus:ring-emerald-500">
-                    <option value="TODOS">Todos los Índices</option>
-                    <option value="SP500">S&P 500 (SP500)</option>
-                    <option value="NDX">Nasdaq 100 (NDX)</option>
-                    <option value="IBEX35">IBEX 35 (IBEX35)</option>
-                    <option value="DAX40">DAX 40 (DAX40)</option>
-                </select>
+  <!-- LISTA -->
+  <section id="listWrap">
+    <div id="empty">Buscando <b>swing_data.json</b> automático...</div>
+    <table id="tbl" hidden>
+      <thead><tr>
+        <th data-k="ticker">Valor</th><th data-k="market">Mercado</th>
+        <th data-k="rs">RS</th><th data-k="adr">ADR%</th>
+        <th data-k="pct_under_high52">% vs máx 52s</th><th data-k="burst40d">Impulso</th>
+        <th data-k="setup">Setup</th><th data-k="days_to_earnings">Earnings</th><th>40 sesiones</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </section>
 
-                <label class="text-xs text-slate-400 font-semibold ml-2">Setup:</label>
-                <select id="filter-setup" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 focus:ring-emerald-500">
-                    <option value="TODOS">Todos (Trend Template)</option>
-                    <option value="SETUP_A">Solo Setup A (VCP)</option>
-                    <option value="SETUP_B">Solo Setup B (Pullback)</option>
-                </select>
+  <!-- DETALLE -->
+  <aside id="detail">
+    <div id="dHead">
+      <h2 id="dTicker">—</h2><span class="mkt" id="dMkt"></span>
+      <button class="btn" id="dClose">Cerrar</button>
+    </div>
+    <div id="tvchart"></div>
+    <div id="dGrid"></div>
+    <div id="plan"></div>
+  </aside>
+</main>
 
-                <label class="text-xs text-slate-400 font-semibold ml-2">RS Min:</label>
-                <input type="number" id="filter-rs" value="0" min="0" max="100" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
-
-                <label class="text-xs text-slate-400 font-semibold ml-2">ADR Min (%):</label>
-                <input type="number" id="filter-adr" value="0" step="0.5" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
-            </div>
-
-            <div class="relative w-full sm:w-64">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="Buscar Ticker..." class="w-full bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500">
-            </div>
-        </div>
-    </section>
-
-    <!-- CONTENIDO PRINCIPAL: TABLA + GRAFICO -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Tabla de Tickers -->
-        <div class="lg:col-span-2 glass-panel rounded-xl overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-300">
-                    <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
-                        <tr>
-                            <th class="p-3">Ticker / Mercado</th>
-                            <th class="p-3">Setup</th>
-                            <th class="p-3 text-right">Precio</th>
-                            <th class="p-3 text-right">Pivote A</th>
-                            <th class="p-3 text-right">RS Rank</th>
-                            <th class="p-3 text-right">ADR%</th>
-                            <th class="p-3 text-center">Earnings</th>
-                            <th class="p-3 text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-800">
-                        <!-- Filas dinámicas -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Visor de Gráfico TradingView -->
-        <div class="glass-panel p-4 rounded-xl flex flex-col h-[550px]">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-area text-emerald-400"></i>
-                    Gráfico Diario: <span id="tv-selected-symbol" class="text-emerald-400 font-mono">-</span>
-                </h3>
-            </div>
-            <div id="tradingview-container" class="w-full flex-grow rounded-lg overflow-hidden border border-slate-700 bg-slate-900">
-                <!-- Inyección del widget -->
-            </div>
-        </div>
-
+<!-- MODAL BACKTEST -->
+<div id="modalBacktest">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h2>Auditoría Histórica de Medias</h2>
+        <p>Regla: Entrada Cierre > MA10 > MA15 > MA20 > MA30 | Salida Cierre < MA20 (5 Años)</p>
+      </div>
+      <button class="btn" onclick="cerrarModalBacktest()">✕ Cerrar</button>
     </div>
 
-    <!-- MODAL DE BACKTEST -->
-    <div id="modal-backtest" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
-        <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
-                <div>
-                    <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
-                        <i class="fa-solid fa-microchip"></i> Auditoría Histórica de Alineación de Medias
-                    </h2>
-                    <p class="text-xs text-slate-400 mt-1">REGLA: Entrada Cierre > MA10 > MA15 > MA20 > MA30 | Salida Cierre < MA20 (5 Años)</p>
-                </div>
-                <button onclick="cerrarModalBacktest()" class="text-slate-400 hover:text-white text-xl p-2">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6" id="backtest-kpis">
-                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
-                    <div class="text-[10px] text-slate-400 font-semibold uppercase">Win Rate (Acierto)</div>
-                    <div class="text-2xl font-bold text-emerald-400 mt-1" id="bt-winrate">-</div>
-                </div>
-                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
-                    <div class="text-[10px] text-slate-400 font-semibold uppercase">Profit Factor</div>
-                    <div class="text-2xl font-bold text-blue-400 mt-1" id="bt-pf">-</div>
-                </div>
-                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
-                    <div class="text-[10px] text-slate-400 font-semibold uppercase">Expectancia Méd.</div>
-                    <div class="text-2xl font-bold text-amber-400 mt-1" id="bt-exp">-</div>
-                </div>
-                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
-                    <div class="text-[10px] text-slate-400 font-semibold uppercase">vs Buy & Hold</div>
-                    <div class="text-2xl font-bold text-indigo-400 mt-1" id="bt-beat">-</div>
-                </div>
-            </div>
-
-            <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-layer-group text-amber-400"></i> Desglose por Terciles de Volatilidad (ADR%)
-            </h3>
-            <div class="overflow-x-auto mb-6 glass-panel rounded-lg">
-                <table class="w-full text-left text-xs text-slate-300">
-                    <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px]">
-                        <tr>
-                            <th class="p-3">Tercil ADR</th>
-                            <th class="p-3 text-right">Rango ADR</th>
-                            <th class="p-3 text-right">Operaciones</th>
-                            <th class="p-3 text-right">Win Rate</th>
-                            <th class="p-3 text-right">Ganancia Media</th>
-                            <th class="p-3 text-right">Pérdida Media</th>
-                            <th class="p-3 text-right">Profit Factor</th>
-                        </tr>
-                    </thead>
-                    <tbody id="backtest-terciles-body" class="divide-y divide-slate-800 font-mono">
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="text-right">
-                <button onclick="cerrarModalBacktest()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-5 py-2 rounded-lg transition">
-                    Cerrar
-                </button>
-            </div>
-        </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="lbl">Win Rate (Acierto)</div>
+        <div class="val" style="color:var(--green)" id="bt-winrate">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="lbl">Profit Factor</div>
+        <div class="val" style="color:var(--blue)" id="bt-pf">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="lbl">Expectancia Méd.</div>
+        <div class="val" style="color:var(--amber)" id="bt-exp">-</div>
+      </div>
+      <div class="kpi-card">
+        <div class="lbl">vs Buy & Hold</div>
+        <div class="val" style="color:var(--txt)" id="bt-beat">-</div>
+      </div>
     </div>
 
-    <!-- TRADINGVIEW WIDGET SCRIPT -->
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <h3 class="disp" style="font-size:16px; margin-bottom:10px; color:var(--amber); text-transform:uppercase;">Desglose por Terciles de Volatilidad (ADR%)</h3>
+    <table class="bt-tbl">
+      <thead>
+        <tr>
+          <th>Tercil ADR</th>
+          <th>Rango ADR</th>
+          <th>Operaciones</th>
+          <th>Win Rate</th>
+          <th>Ganancia Media</th>
+          <th>Pérdida Media</th>
+          <th>Profit Factor</th>
+        </tr>
+      </thead>
+      <tbody id="bt-terciles-body"></tbody>
+    </table>
 
-    <script>
-        let datosGlobales = [];
-        let datosFiltrados = [];
-        let backtestData = null;
+    <div style="text-align:right;">
+      <button class="btn" onclick="cerrarModalBacktest()">Cerrar</button>
+    </div>
+  </div>
+</div>
 
-        async function cargarDatos() {
-            try {
-                const response = await fetch('swing_data.json?v=' + new Date().getTime());
-                if (!response.ok) throw new Error("No se pudo cargar swing_data.json");
-                const data = await response.json();
-                
-                datosGlobales = data.stocks || [];
-                
-                if (data.generated) {
-                    const fecha = new Date(data.generated);
-                    document.getElementById('last-update').innerText = fecha.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
-                } else {
-                    document.getElementById('last-update').innerText = "Reciente";
-                }
+<script>
+"use strict";
+const LS_KEY = "swing_scanner_v1";
+const LS_CFG = "swing_scanner_cfg_v1";
 
-                aplicarFiltros();
-                if(datosFiltrados.length > 0) {
-                    cargarGraficoTradingView(datosFiltrados[0].tv || datosFiltrados[0].ticker);
-                }
+let DATA = null;      // fichero completo
+let VIEW = [];        // filas tras filtros
+let SEL = null;       // ticker seleccionado
+let sortK = "rs", sortDir = -1;
+let backtestData = null;
 
-                cargarBacktestData();
-            } catch (error) {
-                console.error("Error al cargar los datos:", error);
-            }
-        }
+/* ---------------- configuración de puertas ---------------- */
+const DEFAULT_CFG = {
+  markets: {},                       // se rellena al cargar datos
+  gates: {
+    trend:   {on:true,  label:"Trend Template"},
+    rs:      {on:true,  label:"RS percentil ≥", val:80},
+    adr:     {on:true,  label:"ADR ≥ %", val:3.5},
+    liq:     {on:true,  label:"Vol. medio ≥ M", val:20},
+    burst:   {on:true,  label:"Impulso 40s ≥ %", val:30},
+    earn:    {on:true,  label:"Earnings a ≥ días", val:7},
+  }
+};
+let CFG = loadCfg();
 
-        async function cargarBacktestData() {
-            try {
-                const res = await fetch('backtest_data.json?v=' + new Date().getTime());
-                if(res.ok) {
-                    backtestData = await res.json();
-                    renderizarModalBacktest();
-                }
-            } catch(e) { console.log("Backtest no disponible aún."); }
-        }
+function loadCfg(){
+  try{
+    const raw = localStorage.getItem(LS_CFG);
+    if(raw){
+      const c = JSON.parse(raw);
+      for(const k in DEFAULT_CFG.gates) if(!c.gates[k]) c.gates[k] = DEFAULT_CFG.gates[k];
+      return c;
+    }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_CFG));
+}
+function saveCfg(){ localStorage.setItem(LS_CFG, JSON.stringify(CFG)); }
 
-        function abrirModalBacktest() {
-            document.getElementById('modal-backtest').classList.remove('hidden');
-        }
+/* ---------------- carga de datos ---------------- */
+document.getElementById("file").addEventListener("change", ev=>{
+  const f = ev.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const j = JSON.parse(r.result);
+      if(!j.stocks || !Array.isArray(j.stocks)) throw new Error("formato");
+      localStorage.setItem(LS_KEY, r.result);
+      boot(j);
+    }catch(e){ alert("El fichero no parece un swing_data.json válido."); }
+  };
+  r.readAsText(f);
+});
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  if(confirm("¿Borrar los datos guardados en este navegador?")){
+    localStorage.removeItem(LS_KEY); location.reload();
+  }
+});
 
-        function cerrarModalBacktest() {
-            document.getElementById('modal-backtest').classList.add('hidden');
-        }
+async function autoFetchData() {
+  try {
+    const res = await fetch("swing_data.json?v=" + new Date().getTime());
+    if (res.ok) {
+      const j = await res.json();
+      boot(j);
+    }
+  } catch(e) { console.log("Esperando carga manual."); }
+  
+  try {
+    const resBt = await fetch("backtest_data.json?v=" + new Date().getTime());
+    if(resBt.ok) {
+      backtestData = await resBt.json();
+      renderModalBacktest();
+    }
+  } catch(e){}
+}
 
-        function renderizarModalBacktest() {
-            if(!backtestData) return;
+function boot(j){
+  DATA = j;
+  for(const m of j.markets) if(CFG.markets[m]===undefined) CFG.markets[m]=true;
+  document.getElementById("meta").textContent =
+    `${j.universe_size} valores · generado ${new Date(j.generated).toLocaleString("es-ES")}`;
+  renderMarkets(); renderGates(); apply();
+}
 
-            document.getElementById('bt-winrate').innerText = backtestData.global.acierto_pct + '%';
-            document.getElementById('bt-pf').innerText = backtestData.global.profit_factor;
-            document.getElementById('bt-exp').innerText = backtestData.global.expectancia_pct + '%';
-            document.getElementById('bt-beat').innerText = 'Bate ' + backtestData.comparativa.pct_beat_buyhold + '% B&H';
+/* ---------------- modal backtest ---------------- */
+function abrirModalBacktest(){ document.getElementById("modalBacktest").classList.add("open"); }
+function cerrarModalBacktest(){ document.getElementById("modalBacktest").classList.remove("open"); }
 
-            const tbody = document.getElementById('backtest-terciles-body');
-            tbody.innerHTML = '';
+function renderModalBacktest(){
+  if(!backtestData) return;
+  document.getElementById("bt-winrate").textContent = backtestData.global.acierto_pct + "%";
+  document.getElementById("bt-pf").textContent = backtestData.global.profit_factor;
+  document.getElementById("bt-exp").textContent = backtestData.global.expectancia_pct + "%";
+  document.getElementById("bt-beat").textContent = "Bate " + backtestData.comparativa.pct_beat_buyhold + "% B&H";
 
-            for(const [tercil, stats] of Object.entries(backtestData.terciles)) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-200 font-sans">${tercil}</td>
-                    <td class="p-3 text-right text-slate-400">${stats.rango_adr}</td>
-                    <td class="p-3 text-right">${stats.operaciones}</td>
-                    <td class="p-3 text-right text-emerald-400 font-bold">${stats.acierto_pct}%</td>
-                    <td class="p-3 text-right text-emerald-400">+${stats.ganancia_media_pct}%</td>
-                    <td class="p-3 text-right text-rose-400">${stats.perdida_media_pct}%</td>
-                    <td class="p-3 text-right text-amber-400 font-bold">${stats.profit_factor}</td>
-                `;
-                tbody.appendChild(tr);
-            }
-        }
+  const tbody = document.getElementById("bt-terciles-body");
+  tbody.innerHTML = "";
+  for(const [tercil, stats] of Object.entries(backtestData.terciles)){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${tercil}</td>
+      <td style="color:var(--dim)">${stats.rango_adr}</td>
+      <td>${stats.operaciones}</td>
+      <td style="color:var(--green); font-weight:600">${stats.acierto_pct}%</td>
+      <td style="color:var(--green)">+${stats.ganancia_media_pct}%</td>
+      <td style="color:var(--red)">${stats.perdida_media_pct}%</td>
+      <td style="color:var(--amber); font-weight:600">${stats.profit_factor}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
 
-        function aplicarFiltros() {
-            const marketFilter = document.getElementById('filter-market').value;
-            const setupFilter = document.getElementById('filter-setup').value;
-            const rsMin = parseFloat(document.getElementById('filter-rs').value) || 0;
-            const adrMin = parseFloat(document.getElementById('filter-adr').value) || 0;
-            const search = document.getElementById('search-input').value.toUpperCase();
+/* ---------------- puertas ---------------- */
+function renderMarkets(){
+  const box = document.getElementById("mercados"); box.innerHTML="";
+  for(const m of DATA.markets){
+    const id = "mk_"+m;
+    const lb = document.createElement("label");
+    lb.innerHTML = `<input type="checkbox" id="${id}" ${CFG.markets[m]?"checked":""}> ${m}`;
+    lb.querySelector("input").addEventListener("change", e=>{
+      CFG.markets[m]=e.target.checked; saveCfg(); apply();
+    });
+    box.appendChild(lb);
+  }
+}
 
-            datosFiltrados = datosGlobales.filter(item => {
-                // Comprobación flexible del mercado (coincide con SP500, NDX, IBEX35, DAX40)
-                const itemMarket = (item.market || '').toUpperCase();
-                const matchMarket = marketFilter === 'TODOS' || itemMarket === marketFilter.toUpperCase();
-                
-                let matchSetup = true;
-                if (setupFilter === 'SETUP_A') matchSetup = item.setup_a;
-                else if (setupFilter === 'SETUP_B') matchSetup = item.setup_b;
-                
-                const matchRS = item.rs >= rsMin;
-                const matchADR = item.adr >= adrMin;
-                const matchSearch = item.ticker.includes(search);
+function gateFns(){
+  const g = CFG.gates;
+  return [
+    {k:"trend", fn:r=>r.trend_template},
+    {k:"rs",    fn:r=>r.rs >= +g.rs.val},
+    {k:"adr",   fn:r=>r.adr >= +g.adr.val},
+    {k:"liq",   fn:r=>r.dollar_vol >= +g.liq.val*1e6},
+    {k:"burst", fn:r=>r.burst40d >= +g.burst.val},
+    {k:"earn",  fn:r=>r.days_to_earnings===null || r.days_to_earnings<0 || r.days_to_earnings >= +g.earn.val},
+  ];
+}
 
-                return item.trend_template && matchMarket && matchSetup && matchRS && matchADR && matchSearch;
-            });
+function renderGates(){
+  const box = document.getElementById("gates"); box.innerHTML="";
+  for(const k in CFG.gates){
+    const g = CFG.gates[k];
+    const d = document.createElement("div");
+    d.className = "gate"+(g.on?"":" off"); d.id = "gate_"+k;
+    d.innerHTML = `
+      <div class="row1">
+        <label><input type="checkbox" ${g.on?"checked":""} data-g="${k}">${g.label}</label>
+        <div><div class="count" id="cnt_${k}">—</div><div class="cut" id="cut_${k}"></div></div>
+      </div>
+      ${g.val!==undefined?`<div class="ctl">umbral <input type="number" step="0.5" value="${g.val}" data-v="${k}"></div>`:""}`;
+    d.querySelector("[data-g]").addEventListener("change", e=>{
+      g.on=e.target.checked; d.classList.toggle("off",!g.on); saveCfg(); apply();
+    });
+    const nv = d.querySelector("[data-v]");
+    if(nv) nv.addEventListener("change", e=>{ g.val=+e.target.value; saveCfg(); apply(); });
+    box.appendChild(d);
+  }
+}
 
-            renderizarTabla();
-            actualizarKPIs();
-        }
+/* ---------------- filtrado + embudo ---------------- */
+function apply(){
+  if(!DATA) return;
+  let pool = DATA.stocks.filter(r=>CFG.markets[r.market]);
+  for(const {k,fn} of gateFns()){
+    const before = pool.length;
+    if(CFG.gates[k].on) pool = pool.filter(fn);
+    const c = document.getElementById("cnt_"+k), cut = document.getElementById("cut_"+k);
+    if(c){ c.textContent = pool.length; cut.textContent = CFG.gates[k].on?`−${before-pool.length}`:"apagado"; }
+  }
+  VIEW = pool;
+  const sv = document.getElementById("survivors");
+  sv.firstChild.textContent = pool.length;
+  sortAndRender();
+}
 
-        function renderizarTabla() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
+function sortAndRender(){
+  const k = sortK;
+  VIEW.sort((a,b)=>{
+    let va, vb;
+    if(k==="setup"){ va=(a.setup_a?2:0)+(a.setup_b?1:0); vb=(b.setup_a?2:0)+(b.setup_b?1:0); }
+    else if(k==="days_to_earnings"){ va=a[k]===null?9999:a[k]; vb=b[k]===null?9999:b[k]; }
+    else { va=a[k]; vb=b[k]; }
+    if(typeof va==="string") return sortDir*va.localeCompare(vb);
+    return sortDir*(va-vb);
+  });
+  renderTable();
+}
 
-            if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No hay candidatos en este índice que cumplan actualmente las 5 reglas del Trend Template de Minervini.</td></tr>`;
-                return;
-            }
+document.querySelectorAll("thead th[data-k]").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const k = th.dataset.k;
+    if(sortK===k) sortDir*=-1; else { sortK=k; sortDir=-1; }
+    sortAndRender();
+  });
+});
 
-            datosFiltrados.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-800/50 transition cursor-pointer";
-                tr.onclick = () => cargarGraficoTradingView(item.tv || item.ticker);
+/* ---------------- tabla ---------------- */
+function sparkSVG(arr){
+  if(!arr || arr.length<2) return "";
+  const min=Math.min(...arr), max=Math.max(...arr), rg=max-min||1;
+  const pts = arr.map((v,i)=>`${(i/(arr.length-1)*90).toFixed(1)},${(22-(v-min)/rg*20).toFixed(1)}`).join(" ");
+  const up = arr[arr.length-1]>=arr[0];
+  return `<svg class="spark" viewBox="0 0 90 24"><polyline points="${pts}" fill="none"
+    stroke="${up?'var(--green)':'var(--red)'}" stroke-width="1.5"/></svg>`;
+}
+function earnCell(d){
+  if(d===null) return `<span class="ern-unk" title="Sin dato de earnings">?</span>`;
+  if(d<0) return `<span class="ern-ok">pasados</span>`;
+  const cls = d < +CFG.gates.earn.val ? "ern-warn" : "ern-ok";
+  return `<span class="${cls}">${d} d</span>`;
+}
+function renderTable(){
+  const tb = document.getElementById("tbody"); tb.innerHTML="";
+  document.getElementById("tbl").hidden = VIEW.length===0 && !DATA;
+  document.getElementById("empty").style.display = DATA ? "none":"block";
+  document.getElementById("tbl").hidden = !DATA;
+  for(const r of VIEW){
+    const tr = document.createElement("tr");
+    if(r.ticker===SEL) tr.classList.add("sel");
+    tr.innerHTML = `
+      <td class="tk">${r.ticker}</td><td class="mkt">${r.market}</td>
+      <td>${r.rs.toFixed(0)}</td><td>${r.adr.toFixed(1)}</td>
+      <td>${r.pct_under_high52.toFixed(1)}%</td><td>+${r.burst40d.toFixed(0)}%</td>
+      <td>${r.setup_a?'<span class="badge bA">A rotura</span>':""}${r.setup_b?'<span class="badge bB">B pullback</span>':""}</td>
+      <td>${earnCell(r.days_to_earnings)}</td>
+      <td>${sparkSVG(r.spark)}</td>`;
+    tr.addEventListener("click", ()=>openDetail(r));
+    tb.appendChild(tr);
+  }
+}
 
-                let setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 border border-slate-700">T. TEMPLATE</span>`;
-                if (item.setup_a && item.setup_b) {
-                    setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-a mr-1">SETUP A</span><span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
-                } else if (item.setup_a) {
-                    setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-a">SETUP A</span>`;
-                } else if (item.setup_b) {
-                    setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
-                }
+/* ---------------- detalle + TradingView ---------------- */
+function openDetail(r){
+  SEL = r.ticker;
+  document.getElementById("detail").classList.add("open");
+  document.getElementById("dTicker").textContent = r.ticker;
+  document.getElementById("dMkt").innerHTML = r.market + " · " +
+    `<a href="https://es.tradingview.com/chart/?symbol=${encodeURIComponent(r.tv)}"
+        target="_blank" rel="noopener">abrir en TradingView (histórico completo) ↗</a>`;
+  renderTable();
 
-                let earningsBadge = `<span class="text-slate-500">-</span>`;
-                if (item.days_to_earnings !== null && item.days_to_earnings !== undefined) {
-                    if (item.days_to_earnings <= 7 && item.days_to_earnings >= 0) {
-                        earningsBadge = `<span class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${item.days_to_earnings}d</span>`;
-                    } else {
-                        earningsBadge = `<span class="text-slate-400">${item.days_to_earnings}d</span>`;
-                    }
-                }
+  // gráfico TradingView con medias precargadas
+  document.getElementById("tvchart").innerHTML = "";
+  new TradingView.widget({
+    container_id: "tvchart",
+    symbol: r.tv,
+    interval: "D",
+    autosize: true,
+    theme: "dark",
+    style: "1",
+    locale: "es",
+    hide_top_toolbar: false,
+    hide_legend: false,
+    studies: [
+      {id:"MAExp@tv-basicstudies",   inputs:{length:10}},
+      {id:"MAExp@tv-basicstudies",   inputs:{length:21}},
+      {id:"MASimple@tv-basicstudies",inputs:{length:50}},
+      {id:"MASimple@tv-basicstudies",inputs:{length:200}}
+    ]
+  });
 
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-200">
-                        <div class="font-mono text-sm">${item.ticker}</div>
-                        <div class="text-[10px] text-slate-500 font-normal">${item.market}</div>
-                    </td>
-                    <td class="p-3">${setupBadge}</td>
-                    <td class="p-3 text-right font-mono text-slate-200">$${item.close.toFixed(2)}</td>
-                    <td class="p-3 text-right font-mono text-slate-400">${item.pivot ? '$' + item.pivot.toFixed(2) : '-'}</td>
-                    <td class="p-3 text-right font-mono font-bold text-emerald-400">${item.rs}</td>
-                    <td class="p-3 text-right font-mono text-amber-400">${item.adr.toFixed(2)}%</td>
-                    <td class="p-3 text-center font-mono">${earningsBadge}</td>
-                    <td class="p-3 text-center">
-                        <button class="bg-slate-700 hover:bg-emerald-600 text-white text-[10px] px-2 py-1 rounded transition">
-                            <i class="fa-solid fa-chart-line"></i> Ver
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+  const stopA = (r.pivot*0.95).toFixed(2);
+  const cells = [
+    ["Cierre", r.close, ""],
+    ["RS", r.rs.toFixed(0), r.rs>=90?"g":"a"],
+    ["ADR 20s", r.adr.toFixed(1)+"%", r.adr>=4?"g":""],
+    ["EMA10", r.ema10, ""], ["EMA21", r.ema21, ""],
+    ["SMA50", r.sma50, ""],
+    ["SMA200", r.sma200, ""],
+    ["% vs máx 52s", r.pct_under_high52.toFixed(1)+"%", ""],
+    ["% sobre mín 52s", "+"+r.pct_over_low52.toFixed(0)+"%", ""],
+    ["Impulso 40 ses.", "+"+r.burst40d.toFixed(0)+"%", ""],
+    ["Pivote (máx 13s)", r.pivot, "a"],
+    ["Earnings", r.days_to_earnings===null?"?":(r.days_to_earnings<0?"pasados":r.days_to_earnings+" días"),
+      r.days_to_earnings!==null && r.days_to_earnings>=0 && r.days_to_earnings<+CFG.gates.earn.val ? "r":""],
+  ];
+  document.getElementById("dGrid").innerHTML =
+    cells.map(([k,v,c])=>`<div class="cell"><div class="k">${k}</div><div class="v ${c}">${v}</div></div>`).join("");
 
-        function actualizarKPIs() {
-            document.getElementById('kpi-total').innerText = datosFiltrados.length;
-            document.getElementById('kpi-setup-a').innerText = datosFiltrados.filter(i => i.setup_a).length;
-            document.getElementById('kpi-setup-b').innerText = datosFiltrados.filter(i => i.setup_b).length;
+  document.getElementById("plan").innerHTML = `
+    ${r.setup_a?`<b>Setup A</b> — rotura sobre <b>${r.pivot}</b> con volumen &gt; media 10 ses.
+      Stop bajo el mínimo del día de rotura (referencia máx. −5%: ~${stopA}).
+      Fallo: cierre bajo el pivote en las 2 primeras sesiones → fuera.<br>`:""}
+    ${r.setup_b?`<b>Setup B</b> — giro sobre EMA10/21 (${r.ema10} / ${r.ema21}):
+      entrada al superar el máximo del día anterior, stop en el mínimo del retroceso.<br>`:""}
+    ${!r.setup_a&&!r.setup_b?"Sin setup activo — pasa el embudo pero aún no hay gatillo.<br>":""}
+    Riesgo por operación: 0,5–1% del capital. Ratio mínimo 2:1 o no hay trade.`;
+}
+document.getElementById("dClose").addEventListener("click", ()=>{
+  document.getElementById("detail").classList.remove("open"); SEL=null; renderTable();
+});
 
-            if (datosFiltrados.length > 0) {
-                const avgADR = datosFiltrados.reduce((acc, curr) => acc + curr.adr, 0) / datosFiltrados.length;
-                document.getElementById('kpi-adr').innerText = avgADR.toFixed(2) + '%';
-            } else {
-                document.getElementById('kpi-adr').innerText = '-';
-            }
-        }
-
-        function cargarGraficoTradingView(symbol) {
-            document.getElementById('tv-selected-symbol').innerText = symbol;
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": symbol,
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "es",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_side_toolbar": true,
-                "allow_symbol_change": true,
-                "container_id": "tradingview-container"
-            });
-        }
-
-        window.onload = cargarDatos;
-    </script>
+/* ---------------- arranque ---------------- */
+(function init(){
+  const raw = localStorage.getItem(LS_KEY);
+  if(raw){ try{ boot(JSON.parse(raw)); }catch(e){} }
+  autoFetchData();
+})();
+</script>
 </body>
 </html>
