@@ -31,7 +31,17 @@
   }
   header h1{font-size:26px; font-weight:700; text-transform:uppercase}
   header h1 span{color:var(--amber)}
-  #meta{color:var(--dim); font-size:12px}
+  #meta{
+    color:var(--dim); font-size:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  }
+  .badge-last-update {
+    background: rgba(56, 211, 153, 0.12);
+    color: var(--green);
+    border: 1px solid rgba(56, 211, 153, 0.3);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
   #loadWrap{margin-left:auto; display:flex; gap:10px; align-items:center}
   .btn{
     background:var(--panel2); color:var(--txt); border:1px solid var(--line);
@@ -162,7 +172,10 @@
 
 <header>
   <h1>Swing<span>Scanner</span></h1>
-  <div id="meta">Cargando swing_data.json...</div>
+  <div id="meta">
+    <span id="meta-count">Cargando swing_data.json...</span>
+    <span id="meta-update" class="badge-last-update">Buscando fecha...</span>
+  </div>
   <div id="loadWrap">
     <button class="btn btn-green" onclick="abrirModalBacktest()">📊 Ver Backtest</button>
     <input type="file" id="file" accept=".json" hidden>
@@ -337,8 +350,17 @@ async function autoFetchData() {
 function boot(j){
   DATA = j;
   for(const m of j.markets) if(CFG.markets[m]===undefined) CFG.markets[m]=true;
-  document.getElementById("meta").textContent =
-    `${j.universe_size} valores · generado ${new Date(j.generated).toLocaleString("es-ES")}`;
+  
+  document.getElementById("meta-count").textContent = `${j.universe_size} valores`;
+  
+  if (j.generated) {
+    const f = new Date(j.generated);
+    const fechaTexto = f.toLocaleString("es-ES", { dateStyle: 'short', timeStyle: 'short' });
+    document.getElementById("meta-update").textContent = `ÚLTIMA ACTUALIZACIÓN: ${fechaTexto}`;
+  } else {
+    document.getElementById("meta-update").textContent = `ÚLTIMA ACTUALIZACIÓN: Reciente`;
+  }
+
   renderMarkets(); renderGates(); apply();
 }
 
