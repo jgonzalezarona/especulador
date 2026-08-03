@@ -130,26 +130,33 @@
         let datosGlobales = [];
         let datosFiltrados = [];
 
-        // 1. Cargar Datos del JSON
+        // 1. Cargar Datos del JSON (Flexible para varios formatos)
         async function cargarDatos() {
             try {
-                const response = await fetch('swing_data.json');
+                // Forzar bypass de caché del navegador añadiendo timestamp
+                const response = await fetch('swing_data.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("No se pudo cargar swing_data.json");
                 const data = await response.json();
                 
-                datosGlobales = data.resultados || [];
-                document.getElementById('last-update').innerText = data.fecha_actualizacion || 'N/D';
+                // Adaptabilidad: Acepta tanto {"resultados": [...]} como una lista directa [...]
+                if (Array.isArray(data)) {
+                    datosGlobales = data;
+                    document.getElementById('last-update').innerText = "Hoy";
+                } else {
+                    datosGlobales = data.resultados || data.data || [];
+                    document.getElementById('last-update').innerText = data.fecha_actualizacion || data.fecha || 'Hoy';
+                }
 
                 aplicarFiltros();
-                if(datosGlobales.length > 0) {
-                    cargarGraficoTradingView(datosGlobales[0].ticker);
+                if(datosFiltrados.length > 0) {
+                    cargarGraficoTradingView(datosFiltrados[0].ticker);
                 }
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
                 document.getElementById('table-body').innerHTML = `
                     <tr>
                         <td colspan="7" class="p-6 text-center text-rose-400 font-semibold">
-                            ⚠️ No se encontró 'swing_data.json'. Ejecuta 'python fetcher_swing.py' primero para generar la base de datos.
+                            ⚠️ No se encontró 'swing_data.json' o está vacío. Revisa tu script de Python.
                         </td>
                     </tr>`;
             }
@@ -163,10 +170,17 @@
             const search = document.getElementById('search-input').value.toUpperCase();
 
             datosFiltrados = datosGlobales.filter(item => {
-                const matchSetup = setupFilter === 'TODOS' || item.setup === setupFilter;
-                const matchRS = item.rs_rank >= rsMin;
-                const matchADR = item.adr_pct >= adrMin;
-                const matchSearch = item.ticker.includes(search) || (item.nombre && item.nombre.toUpperCase().includes(search));
+                const setupVal = item.setup || item.Setup || '';
+                const rsVal = item.rs_rank !== undefined ? item.rs_rank : (item.rs || 0);
+                const adrVal = item.adr_pct !== undefined ? item.adr_pct : (item.adr || 0);
+                const tickerVal = (item.ticker || item.symbol || '').toUpperCase();
+                const nombreVal = (item.nombre || item.name || '').toUpperCase();
+
+                const matchSetup = setupFilter === 'TODOS' || setupVal === setupFilter;
+                const matchRS = rsVal >= rsMin;
+                const matchADR = adrVal >= adrMin;
+                const matchSearch = tickerVal.includes(search) || nombreVal.includes(search);
+
                 return matchSetup && matchRS && matchADR && matchSearch;
             });
 
@@ -180,32 +194,40 @@
             tbody.innerHTML = '';
 
             if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">No hay candidatos que cumplan con los filtros seleccionados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">No hay candidatos que cumplan con los filtros seleccionados. Si acabas de actualizar, revisa los valores RS Min / ADR Min.</td></tr>`;
                 return;
             }
 
             datosFiltrados.forEach(item => {
+                const ticker = item.ticker || item.symbol || 'N/A';
+                const nombre = item.nombre || item.name || '';
+                const setup = item.setup || item.Setup || 'SETUP_A';
+                const precio = parseFloat(item.precio || item.price || 0);
+                const rsRank = item.rs_rank !== undefined ? item.rs_rank : (item.rs || 0);
+                const adrPct = parseFloat(item.adr_pct !== undefined ? item.adr_pct : (item.adr || 0));
+                const diasEarnings = item.dias_earnings !== undefined ? item.dias_earnings : 99;
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-800/50 transition cursor-pointer";
-                tr.onclick = () => cargarGraficoTradingView(item.ticker);
+                tr.onclick = () => cargarGraficoTradingView(ticker);
 
-                const setupBadge = item.setup === 'SETUP_A' 
+                const setupBadge = setup === 'SETUP_A' 
                     ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-a">SETUP A</span>`
                     : `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
 
-                const earningsBadge = item.dias_earnings <= 7
-                    ? `<span class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${item.dias_earnings}d</span>`
-                    : `<span class="text-slate-400">${item.dias_earnings}d</span>`;
+                const earningsBadge = diasEarnings <= 7
+                    ? `<span class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${diasEarnings}d</span>`
+                    : `<span class="text-slate-400">${diasEarnings > 90 ? '-' : diasEarnings + 'd'}</span>`;
 
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-slate-200">
-                        <div class="font-mono text-sm">${item.ticker}</div>
-                        <div class="text-[10px] text-slate-500 truncate max-w-[120px]">${item.nombre || ''}</div>
+                        <div class="font-mono text-sm">${ticker}</div>
+                        <div class="text-[10px] text-slate-500 truncate max-w-[120px]">${nombre}</div>
                     </td>
                     <td class="p-3">${setupBadge}</td>
-                    <td class="p-3 text-right font-mono text-slate-200">$${item.precio.toFixed(2)}</td>
-                    <td class="p-3 text-right font-mono font-bold text-emerald-400">${item.rs_rank}</td>
-                    <td class="p-3 text-right font-mono text-amber-400">${item.adr_pct.toFixed(2)}%</td>
+                    <td class="p-3 text-right font-mono text-slate-200">$${precio.toFixed(2)}</td>
+                    <td class="p-3 text-right font-mono font-bold text-emerald-400">${rsRank}</td>
+                    <td class="p-3 text-right font-mono text-amber-400">${adrPct.toFixed(2)}%</td>
                     <td class="p-3 text-center font-mono">${earningsBadge}</td>
                     <td class="p-3 text-center">
                         <button class="bg-slate-700 hover:bg-emerald-600 text-white text-[10px] px-2 py-1 rounded transition">
@@ -221,13 +243,14 @@
         function actualizarKPIs() {
             document.getElementById('kpi-total').innerText = datosFiltrados.length;
             
-            const countA = datosFiltrados.filter(i => i.setup === 'SETUP_A').length;
-            const countB = datosFiltrados.filter(i => i.setup === 'SETUP_B').length;
+            const countA = datosFiltrados.filter(i => (i.setup || i.Setup) === 'SETUP_A').length;
+            const countB = datosFiltrados.filter(i => (i.setup || i.Setup) === 'SETUP_B').length;
             document.getElementById('kpi-setup-a').innerText = countA;
             document.getElementById('kpi-setup-b').innerText = countB;
 
             if (datosFiltrados.length > 0) {
-                const avgADR = datosFiltrados.reduce((acc, curr) => acc + curr.adr_pct, 0) / datosFiltrados.length;
+                const totalADR = datosFiltrados.reduce((acc, curr) => acc + parseFloat(curr.adr_pct !== undefined ? curr.adr_pct : (curr.adr || 0)), 0);
+                const avgADR = totalADR / datosFiltrados.length;
                 document.getElementById('kpi-adr').innerText = avgADR.toFixed(2) + '%';
             } else {
                 document.getElementById('kpi-adr').innerText = '-';
