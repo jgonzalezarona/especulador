@@ -2,8 +2,11 @@ name: Actualizador Automatico Especulador
 
 on:
   schedule:
-    # 13:30 UTC, 17:30 UTC, 21:30 UTC de Lunes a Viernes
-    - cron: '30 13,17,21 * * 1-5'
+    # Lunes a Viernes: 08:30, 13:30, 15:00, 17:00 y 21:30 UTC
+    # (Corresponden a las 10:30, 15:30, 17:00, 19:00 y 23:30 hora peninsular española)
+    - cron: '30 8,13 1-5'
+    - cron: '0 15,17 1-5'
+    - cron: '30 21 1-5'
   workflow_dispatch:
 
 permissions:
