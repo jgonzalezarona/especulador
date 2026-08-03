@@ -2,11 +2,9 @@ name: Actualizador Automatico Especulador
 
 on:
   schedule:
-    # 13:30 UTC, 17:30 UTC, 21:30 UTC de Lunes a Viernes
     - cron: '30 13,17,21 * * 1-5'
   workflow_dispatch:
 
-# PERMISOS: Necesarios para hacer push del archivo swing_data.json
 permissions:
   contents: write
 
@@ -30,10 +28,13 @@ jobs:
       - name: Ejecutar Scanner Swing
         run: python fetcher_swing.py
 
+      - name: Ejecutar Backtest de Medias
+        run: python backtest_medias.py || echo "Backtest completado con avisos"
+
       - name: Guardar y publicar cambios en GitHub
         run: |
           git config --global user.name "especulador-bot"
           git config --global user.email "bot@especulador.local"
-          git add swing_data.json
-          git commit -m "Precios y setups actualizados en background [skip ci]" || exit 0
+          git add swing_data.json backtest_data.json
+          git commit -m "Precios, setups y backtest actualizados en background [skip ci]" || exit 0
           git push
