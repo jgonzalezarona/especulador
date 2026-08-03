@@ -6,15 +6,19 @@ on:
     - cron: '30 13,17,21 * * 1-5'
   workflow_dispatch:
 
+# PERMISOS: Necesarios para hacer push del archivo swing_data.json
+permissions:
+  contents: write
+
 jobs:
   build-and-update:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del codigo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configurar Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
