@@ -25,11 +25,16 @@
             </h1>
             <p class="text-slate-400 text-sm mt-1">Screener de Swing & Breakout (Diario) — Manual v1.0</p>
         </div>
-        <div class="flex items-center gap-4 text-xs text-slate-400 glass-panel px-4 py-2 rounded-lg">
-            <div><i class="fa-regular fa-clock mr-1"></i> Actualizado: <span id="last-update" class="text-slate-200 font-semibold">Cargando...</span></div>
-            <button onclick="cargarDatos()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded transition">
-                <i class="fa-solid fa-rotate mr-1"></i> Recargar
+        <div class="flex items-center gap-3">
+            <button onclick="abrirModalBacktest()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition flex items-center gap-2">
+                <i class="fa-solid fa-vial"></i> 📊 Ver Backtest
             </button>
+            <div class="flex items-center gap-3 text-xs text-slate-400 glass-panel px-4 py-2 rounded-lg">
+                <div><i class="fa-regular fa-clock mr-1"></i> <span id="last-update" class="text-slate-200 font-semibold">Cargando...</span></div>
+                <button onclick="cargarDatos()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-1 rounded transition">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -78,10 +83,10 @@
                 </select>
 
                 <label class="text-xs text-slate-400 font-semibold ml-2">RS Min:</label>
-                <input type="number" id="filter-rs" value="80" min="0" max="100" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
+                <input type="number" id="filter-rs" value="50" min="0" max="100" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
 
                 <label class="text-xs text-slate-400 font-semibold ml-2">ADR Min (%):</label>
-                <input type="number" id="filter-adr" value="3.5" step="0.5" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
+                <input type="number" id="filter-adr" value="1.5" step="0.5" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
             </div>
 
             <div class="relative w-full sm:w-64">
@@ -91,7 +96,7 @@
         </div>
     </section>
 
-    <!-- CONTENIDO PRINCIPAL: TABLA + GRAFICO INTEGRADO -->
+    <!-- CONTENIDO PRINCIPAL: TABLA + GRAFICO -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Tabla de Tickers -->
@@ -132,14 +137,80 @@
 
     </div>
 
+    <!-- MODAL DE BACKTEST -->
+    <div id="modal-backtest" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="glass-panel bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-microchip"></i> Auditoría Histórica de Alineación de Medias
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">REGLA: Entrada Cierre > MA10 > MA15 > MA20 > MA30 | Salida Cierre < MA20 (5 Años)</p>
+                </div>
+                <button onclick="cerrarModalBacktest()" class="text-slate-400 hover:text-white text-xl p-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Resumen Global -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6" id="backtest-kpis">
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
+                    <div class="text-[10px] text-slate-400 font-semibold uppercase">Win Rate (Acierto)</div>
+                    <div class="text-2xl font-bold text-emerald-400 mt-1" id="bt-winrate">-</div>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
+                    <div class="text-[10px] text-slate-400 font-semibold uppercase">Profit Factor</div>
+                    <div class="text-2xl font-bold text-blue-400 mt-1" id="bt-pf">-</div>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
+                    <div class="text-[10px] text-slate-400 font-semibold uppercase">Expectancia Méd.</div>
+                    <div class="text-2xl font-bold text-amber-400 mt-1" id="bt-exp">-</div>
+                </div>
+                <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50">
+                    <div class="text-[10px] text-slate-400 font-semibold uppercase">vs Buy & Hold</div>
+                    <div class="text-2xl font-bold text-indigo-400 mt-1" id="bt-beat">-</div>
+                </div>
+            </div>
+
+            <!-- Tabla por Terciles de ADR -->
+            <h3 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-amber-400"></i> Desglose por Terciles de Volatilidad (ADR%)
+            </h3>
+            <div class="overflow-x-auto mb-6 glass-panel rounded-lg">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px]">
+                        <tr>
+                            <th class="p-3">Tercil ADR</th>
+                            <th class="p-3 text-right">Rango ADR</th>
+                            <th class="p-3 text-right">Operaciones</th>
+                            <th class="p-3 text-right">Win Rate</th>
+                            <th class="p-3 text-right">Ganancia Media</th>
+                            <th class="p-3 text-right">Pérdida Media</th>
+                            <th class="p-3 text-right">Profit Factor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backtest-terciles-body" class="divide-y divide-slate-800 font-mono">
+                        <!-- Filas dinámicas -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-right">
+                <button onclick="cerrarModalBacktest()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-5 py-2 rounded-lg transition">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TRADINGVIEW WIDGET SCRIPT -->
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
     <script>
         let datosGlobales = [];
         let datosFiltrados = [];
+        let backtestData = null;
 
-        // 1. Cargar Datos del JSON generado por tu fetcher
         async function cargarDatos() {
             try {
                 const response = await fetch('swing_data.json?v=' + new Date().getTime());
@@ -148,7 +219,6 @@
                 
                 datosGlobales = data.stocks || [];
                 
-                // Formatear la fecha
                 if (data.generated) {
                     const fecha = new Date(data.generated);
                     document.getElementById('last-update').innerText = fecha.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
@@ -160,18 +230,58 @@
                 if(datosFiltrados.length > 0) {
                     cargarGraficoTradingView(datosFiltrados[0].tv || datosFiltrados[0].ticker);
                 }
+
+                // Cargar datos del backtest en segundo plano
+                cargarBacktestData();
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
-                document.getElementById('table-body').innerHTML = `
-                    <tr>
-                        <td colspan="8" class="p-6 text-center text-rose-400 font-semibold">
-                            ⚠️ Error al leer 'swing_data.json'. Verifica que el workflow de GitHub se haya ejecutado correctamente.
-                        </td>
-                    </tr>`;
             }
         }
 
-        // 2. Aplicar Filtros Dinámicos
+        async function cargarBacktestData() {
+            try {
+                const res = await fetch('backtest_data.json?v=' + new Date().getTime());
+                if(res.ok) {
+                    backtestData = await res.json();
+                    renderizarModalBacktest();
+                }
+            } catch(e) { console.log("Backtest no disponible aún."); }
+        }
+
+        function abrirModalBacktest() {
+            document.getElementById('modal-backtest').classList.remove('hidden');
+        }
+
+        function cerrarModalBacktest() {
+            document.getElementById('modal-backtest').classList.add('hidden');
+        }
+
+        function renderizarModalBacktest() {
+            if(!backtestData) return;
+
+            document.getElementById('bt-winrate').innerText = backtestData.global.acierto_pct + '%';
+            document.getElementById('bt-pf').innerText = backtestData.global.profit_factor;
+            document.getElementById('bt-exp').innerText = backtestData.global.expectancia_pct + '%';
+            document.getElementById('bt-beat').innerText = 'Bate ' + backtestData.comparativa.pct_beat_buyhold + '% B&H';
+
+            const tbody = document.getElementById('backtest-terciles-body');
+            tbody.innerHTML = '';
+
+            for(const [tercil, stats] of Object.entries(backtestData.terciles)) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-200 font-sans">${tercil}</td>
+                    <td class="p-3 text-right text-slate-400">${stats.rango_adr}</td>
+                    <td class="p-3 text-right">${stats.operaciones}</td>
+                    <td class="p-3 text-right text-emerald-400 font-bold">${stats.acierto_pct}%</td>
+                    <td class="p-3 text-right text-emerald-400">+${stats.ganancia_media_pct}%</td>
+                    <td class="p-3 text-right text-rose-400">${stats.perdida_media_pct}%</td>
+                    <td class="p-3 text-right text-amber-400 font-bold">${stats.profit_factor}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
         function aplicarFiltros() {
             const marketFilter = document.getElementById('filter-market').value;
             const setupFilter = document.getElementById('filter-setup').value;
@@ -190,7 +300,6 @@
                 const matchADR = item.adr >= adrMin;
                 const matchSearch = item.ticker.includes(search);
 
-                // Solo mostrar los que cumplen Trend Template (filtro base del script)
                 return item.trend_template && matchMarket && matchSetup && matchRS && matchADR && matchSearch;
             });
 
@@ -198,13 +307,12 @@
             actualizarKPIs();
         }
 
-        // 3. Renderizar Tabla
         function renderizarTabla() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
 
             if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No hay valores que cumplan con todos los filtros actuales. Prueba a bajar el RS Min o cambiar de Setup.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No hay valores que cumplan con los filtros.</td></tr>`;
                 return;
             }
 
@@ -213,7 +321,6 @@
                 tr.className = "hover:bg-slate-800/50 transition cursor-pointer";
                 tr.onclick = () => cargarGraficoTradingView(item.tv || item.ticker);
 
-                // Badges para los Setups
                 let setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 border border-slate-700">T. TEMPLATE</span>`;
                 if (item.setup_a && item.setup_b) {
                     setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-a mr-1">SETUP A</span><span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
@@ -223,7 +330,6 @@
                     setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
                 }
 
-                // Badge de Earnings
                 let earningsBadge = `<span class="text-slate-500">-</span>`;
                 if (item.days_to_earnings !== null && item.days_to_earnings !== undefined) {
                     if (item.days_to_earnings <= 7 && item.days_to_earnings >= 0) {
@@ -254,28 +360,21 @@
             });
         }
 
-        // 4. Actualizar KPIs de Resumen
         function actualizarKPIs() {
             document.getElementById('kpi-total').innerText = datosFiltrados.length;
-            
-            const countA = datosFiltrados.filter(i => i.setup_a).length;
-            const countB = datosFiltrados.filter(i => i.setup_b).length;
-            document.getElementById('kpi-setup-a').innerText = countA;
-            document.getElementById('kpi-setup-b').innerText = countB;
+            document.getElementById('kpi-setup-a').innerText = datosFiltrados.filter(i => i.setup_a).length;
+            document.getElementById('kpi-setup-b').innerText = datosFiltrados.filter(i => i.setup_b).length;
 
             if (datosFiltrados.length > 0) {
-                const totalADR = datosFiltrados.reduce((acc, curr) => acc + curr.adr, 0);
-                const avgADR = totalADR / datosFiltrados.length;
+                const avgADR = datosFiltrados.reduce((acc, curr) => acc + curr.adr, 0) / datosFiltrados.length;
                 document.getElementById('kpi-adr').innerText = avgADR.toFixed(2) + '%';
             } else {
                 document.getElementById('kpi-adr').innerText = '-';
             }
         }
 
-        // 5. Cargar Widget Interactivo de TradingView
         function cargarGraficoTradingView(symbol) {
             document.getElementById('tv-selected-symbol').innerText = symbol;
-            
             new TradingView.widget({
                 "autosize": true,
                 "symbol": symbol,
@@ -292,7 +391,6 @@
             });
         }
 
-        // Inicializar al cargar la página
         window.onload = cargarDatos;
     </script>
 </body>
