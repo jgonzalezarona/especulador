@@ -2,9 +2,15 @@ name: Actualizador Automatico Especulador
 
 on:
   schedule:
-    # Lunes a Viernes: 08:30, 13:30, 14:00, 15:30, 17:00 y 21:30 UTC
-    # (Corresponden a las 10:30, 15:30, 16:00, 17:30, 19:00 y 23:30 hora peninsular española)
-    - cron: '30 8,13,15,21 * * 1-5'
+    # Programado en UTC para coincidir exactamente con Hora Peninsular Española (CEST / UTC+2):
+    # - 08:30 UTC -> 10:30 España
+    # - 13:30 UTC -> 15:30 España (Apertura Wall Street)
+    # - 14:00 UTC -> 16:00 España
+    # - 15:30 UTC -> 17:30 España
+    # - 17:00 UTC -> 19:00 España
+    # - 19:30 UTC -> 21:30 España
+    # - 21:30 UTC -> 23:30 España (Cierre Wall Street)
+    - cron: '30 8,13,15,19,21 * * 1-5'
     - cron: '0 14,17 * * 1-5'
   workflow_dispatch:
 
