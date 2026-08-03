@@ -23,10 +23,10 @@
             <h1 class="text-3xl font-bold text-emerald-400 flex items-center gap-3">
                 <i class="fa-solid fa-chart-line"></i> especulador
             </h1>
-            <p class="text-slate-400 text-sm mt-1">Estrategia Al Contado (Timeframe Diario) - Manual v1.0</p>
+            <p class="text-slate-400 text-sm mt-1">Screener de Swing & Breakout (Diario) — Manual v1.0</p>
         </div>
         <div class="flex items-center gap-4 text-xs text-slate-400 glass-panel px-4 py-2 rounded-lg">
-            <div><i class="fa-regular fa-clock mr-1"></i> Última actualización: <span id="last-update" class="text-slate-200 font-semibold">Cargando...</span></div>
+            <div><i class="fa-regular fa-clock mr-1"></i> Actualizado: <span id="last-update" class="text-slate-200 font-semibold">Cargando...</span></div>
             <button onclick="cargarDatos()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1 rounded transition">
                 <i class="fa-solid fa-rotate mr-1"></i> Recargar
             </button>
@@ -36,24 +36,24 @@
     <!-- METRIC CARDS / CAJAS DE RESUMEN -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="glass-panel p-4 rounded-xl">
-            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Candidatos Filtrados</div>
+            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Universo Filtrado</div>
             <div class="text-3xl font-extrabold text-white mt-1" id="kpi-total">-</div>
-            <div class="text-xs text-slate-400 mt-1" id="kpi-total-sub">Cumplen Minervini + RS + ADR</div>
+            <div class="text-xs text-slate-400 mt-1" id="kpi-total-sub">Cumplen Trend Template</div>
         </div>
         <div class="glass-panel p-4 rounded-xl border-l-4 border-emerald-500">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Setup A (VCP / Rotura)</div>
             <div class="text-3xl font-extrabold text-emerald-400 mt-1" id="kpi-setup-a">-</div>
-            <div class="text-xs text-slate-400 mt-1">Consolidación & Contracción</div>
+            <div class="text-xs text-slate-400 mt-1">Consolidación cerca de Pivote</div>
         </div>
         <div class="glass-panel p-4 rounded-xl border-l-4 border-blue-500">
             <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Setup B (Pullback EMA)</div>
             <div class="text-3xl font-extrabold text-blue-400 mt-1" id="kpi-setup-b">-</div>
-            <div class="text-xs text-slate-400 mt-1">Retroceso ordenado 10/21 EMA</div>
+            <div class="text-xs text-slate-400 mt-1">Retroceso a 10/21 EMA</div>
         </div>
         <div class="glass-panel p-4 rounded-xl">
-            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">ADR Medio Universo</div>
+            <div class="text-slate-400 text-xs font-semibold uppercase tracking-wider">ADR Medio Candidatos</div>
             <div class="text-3xl font-extrabold text-amber-400 mt-1" id="kpi-adr">-</div>
-            <div class="text-xs text-slate-400 mt-1">Rango Diario Promedio (20d)</div>
+            <div class="text-xs text-slate-400 mt-1">Volatilidad Diaria Promedio</div>
         </div>
     </section>
 
@@ -61,15 +61,24 @@
     <section class="glass-panel p-4 rounded-xl mb-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-3">
-                <label class="text-xs text-slate-400 font-semibold">Setup:</label>
+                <label class="text-xs text-slate-400 font-semibold">Mercado:</label>
+                <select id="filter-market" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 focus:ring-emerald-500">
+                    <option value="TODOS">Todos los Índices</option>
+                    <option value="SP500">S&P 500</option>
+                    <option value="NDX">Nasdaq 100</option>
+                    <option value="IBEX35">IBEX 35</option>
+                    <option value="DAX40">DAX 40</option>
+                </select>
+
+                <label class="text-xs text-slate-400 font-semibold ml-2">Setup:</label>
                 <select id="filter-setup" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 focus:ring-emerald-500">
-                    <option value="TODOS">Todos los Setups</option>
-                    <option value="SETUP_A">Setup A (VCP / Rotura)</option>
-                    <option value="SETUP_B">Setup B (Pullback EMA)</option>
+                    <option value="TODOS">Todos (Trend Template)</option>
+                    <option value="SETUP_A">Solo Setup A (VCP)</option>
+                    <option value="SETUP_B">Solo Setup B (Pullback)</option>
                 </select>
 
                 <label class="text-xs text-slate-400 font-semibold ml-2">RS Min:</label>
-                <input type="number" id="filter-rs" value="80" min="0" max="99" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
+                <input type="number" id="filter-rs" value="80" min="0" max="100" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
 
                 <label class="text-xs text-slate-400 font-semibold ml-2">ADR Min (%):</label>
                 <input type="number" id="filter-adr" value="3.5" step="0.5" onchange="aplicarFiltros()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg p-2 w-16">
@@ -77,7 +86,7 @@
 
             <div class="relative w-full sm:w-64">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="Buscar Ticker o Empresa..." class="w-full bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                <input type="text" id="search-input" onkeyup="aplicarFiltros()" placeholder="Buscar Ticker..." class="w-full bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-emerald-500">
             </div>
         </div>
     </section>
@@ -85,15 +94,16 @@
     <!-- CONTENIDO PRINCIPAL: TABLA + GRAFICO INTEGRADO -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Tabla de Tickers (2 Columnas en pantallas grandes) -->
+        <!-- Tabla de Tickers -->
         <div class="lg:col-span-2 glass-panel rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs text-slate-300">
                     <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-700">
                         <tr>
-                            <th class="p-3">Ticker / Nombre</th>
+                            <th class="p-3">Ticker / Mercado</th>
                             <th class="p-3">Setup</th>
                             <th class="p-3 text-right">Precio</th>
+                            <th class="p-3 text-right">Pivote A</th>
                             <th class="p-3 text-right">RS Rank</th>
                             <th class="p-3 text-right">ADR%</th>
                             <th class="p-3 text-center">Earnings</th>
@@ -107,7 +117,7 @@
             </div>
         </div>
 
-        <!-- Visor de Gráfico (1 Columna) -->
+        <!-- Visor de Gráfico TradingView -->
         <div class="glass-panel p-4 rounded-xl flex flex-col h-[550px]">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
@@ -115,9 +125,8 @@
                     Gráfico Diario: <span id="tv-selected-symbol" class="text-emerald-400 font-mono">-</span>
                 </h3>
             </div>
-            <!-- Contenedor del Widget de TradingView -->
             <div id="tradingview-container" class="w-full flex-grow rounded-lg overflow-hidden border border-slate-700 bg-slate-900">
-                <!-- Se inyecta dinámicamente -->
+                <!-- Inyección del widget -->
             </div>
         </div>
 
@@ -130,33 +139,33 @@
         let datosGlobales = [];
         let datosFiltrados = [];
 
-        // 1. Cargar Datos del JSON (Flexible para varios formatos)
+        // 1. Cargar Datos del JSON generado por tu fetcher
         async function cargarDatos() {
             try {
-                // Forzar bypass de caché del navegador añadiendo timestamp
                 const response = await fetch('swing_data.json?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("No se pudo cargar swing_data.json");
                 const data = await response.json();
                 
-                // Adaptabilidad: Acepta tanto {"resultados": [...]} como una lista directa [...]
-                if (Array.isArray(data)) {
-                    datosGlobales = data;
-                    document.getElementById('last-update').innerText = "Hoy";
+                datosGlobales = data.stocks || [];
+                
+                // Formatear la fecha
+                if (data.generated) {
+                    const fecha = new Date(data.generated);
+                    document.getElementById('last-update').innerText = fecha.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
                 } else {
-                    datosGlobales = data.resultados || data.data || [];
-                    document.getElementById('last-update').innerText = data.fecha_actualizacion || data.fecha || 'Hoy';
+                    document.getElementById('last-update').innerText = "Reciente";
                 }
 
                 aplicarFiltros();
                 if(datosFiltrados.length > 0) {
-                    cargarGraficoTradingView(datosFiltrados[0].ticker);
+                    cargarGraficoTradingView(datosFiltrados[0].tv || datosFiltrados[0].ticker);
                 }
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
                 document.getElementById('table-body').innerHTML = `
                     <tr>
-                        <td colspan="7" class="p-6 text-center text-rose-400 font-semibold">
-                            ⚠️ No se encontró 'swing_data.json' o está vacío. Revisa tu script de Python.
+                        <td colspan="8" class="p-6 text-center text-rose-400 font-semibold">
+                            ⚠️ Error al leer 'swing_data.json'. Verifica que el workflow de GitHub se haya ejecutado correctamente.
                         </td>
                     </tr>`;
             }
@@ -164,24 +173,25 @@
 
         // 2. Aplicar Filtros Dinámicos
         function aplicarFiltros() {
+            const marketFilter = document.getElementById('filter-market').value;
             const setupFilter = document.getElementById('filter-setup').value;
             const rsMin = parseFloat(document.getElementById('filter-rs').value) || 0;
             const adrMin = parseFloat(document.getElementById('filter-adr').value) || 0;
             const search = document.getElementById('search-input').value.toUpperCase();
 
             datosFiltrados = datosGlobales.filter(item => {
-                const setupVal = item.setup || item.Setup || '';
-                const rsVal = item.rs_rank !== undefined ? item.rs_rank : (item.rs || 0);
-                const adrVal = item.adr_pct !== undefined ? item.adr_pct : (item.adr || 0);
-                const tickerVal = (item.ticker || item.symbol || '').toUpperCase();
-                const nombreVal = (item.nombre || item.name || '').toUpperCase();
+                const matchMarket = marketFilter === 'TODOS' || item.market === marketFilter;
+                
+                let matchSetup = true;
+                if (setupFilter === 'SETUP_A') matchSetup = item.setup_a;
+                else if (setupFilter === 'SETUP_B') matchSetup = item.setup_b;
+                
+                const matchRS = item.rs >= rsMin;
+                const matchADR = item.adr >= adrMin;
+                const matchSearch = item.ticker.includes(search);
 
-                const matchSetup = setupFilter === 'TODOS' || setupVal === setupFilter;
-                const matchRS = rsVal >= rsMin;
-                const matchADR = adrVal >= adrMin;
-                const matchSearch = tickerVal.includes(search) || nombreVal.includes(search);
-
-                return matchSetup && matchRS && matchADR && matchSearch;
+                // Solo mostrar los que cumplen Trend Template (filtro base del script)
+                return item.trend_template && matchMarket && matchSetup && matchRS && matchADR && matchSearch;
             });
 
             renderizarTabla();
@@ -194,40 +204,45 @@
             tbody.innerHTML = '';
 
             if (datosFiltrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-500">No hay candidatos que cumplan con los filtros seleccionados. Si acabas de actualizar, revisa los valores RS Min / ADR Min.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No hay valores que cumplan con todos los filtros actuales. Prueba a bajar el RS Min o cambiar de Setup.</td></tr>`;
                 return;
             }
 
             datosFiltrados.forEach(item => {
-                const ticker = item.ticker || item.symbol || 'N/A';
-                const nombre = item.nombre || item.name || '';
-                const setup = item.setup || item.Setup || 'SETUP_A';
-                const precio = parseFloat(item.precio || item.price || 0);
-                const rsRank = item.rs_rank !== undefined ? item.rs_rank : (item.rs || 0);
-                const adrPct = parseFloat(item.adr_pct !== undefined ? item.adr_pct : (item.adr || 0));
-                const diasEarnings = item.dias_earnings !== undefined ? item.dias_earnings : 99;
-
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-800/50 transition cursor-pointer";
-                tr.onclick = () => cargarGraficoTradingView(ticker);
+                tr.onclick = () => cargarGraficoTradingView(item.tv || item.ticker);
 
-                const setupBadge = setup === 'SETUP_A' 
-                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-a">SETUP A</span>`
-                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
+                // Badges para los Setups
+                let setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold text-slate-400 border border-slate-700">T. TEMPLATE</span>`;
+                if (item.setup_a && item.setup_b) {
+                    setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-a mr-1">SETUP A</span><span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
+                } else if (item.setup_a) {
+                    setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-a">SETUP A</span>`;
+                } else if (item.setup_b) {
+                    setupBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold setup-b">SETUP B</span>`;
+                }
 
-                const earningsBadge = diasEarnings <= 7
-                    ? `<span class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${diasEarnings}d</span>`
-                    : `<span class="text-slate-400">${diasEarnings > 90 ? '-' : diasEarnings + 'd'}</span>`;
+                // Badge de Earnings
+                let earningsBadge = `<span class="text-slate-500">-</span>`;
+                if (item.days_to_earnings !== null && item.days_to_earnings !== undefined) {
+                    if (item.days_to_earnings <= 7 && item.days_to_earnings >= 0) {
+                        earningsBadge = `<span class="text-rose-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${item.days_to_earnings}d</span>`;
+                    } else {
+                        earningsBadge = `<span class="text-slate-400">${item.days_to_earnings}d</span>`;
+                    }
+                }
 
                 tr.innerHTML = `
                     <td class="p-3 font-semibold text-slate-200">
-                        <div class="font-mono text-sm">${ticker}</div>
-                        <div class="text-[10px] text-slate-500 truncate max-w-[120px]">${nombre}</div>
+                        <div class="font-mono text-sm">${item.ticker}</div>
+                        <div class="text-[10px] text-slate-500 font-normal">${item.market}</div>
                     </td>
                     <td class="p-3">${setupBadge}</td>
-                    <td class="p-3 text-right font-mono text-slate-200">$${precio.toFixed(2)}</td>
-                    <td class="p-3 text-right font-mono font-bold text-emerald-400">${rsRank}</td>
-                    <td class="p-3 text-right font-mono text-amber-400">${adrPct.toFixed(2)}%</td>
+                    <td class="p-3 text-right font-mono text-slate-200">$${item.close.toFixed(2)}</td>
+                    <td class="p-3 text-right font-mono text-slate-400">${item.pivot ? '$' + item.pivot.toFixed(2) : '-'}</td>
+                    <td class="p-3 text-right font-mono font-bold text-emerald-400">${item.rs}</td>
+                    <td class="p-3 text-right font-mono text-amber-400">${item.adr.toFixed(2)}%</td>
                     <td class="p-3 text-center font-mono">${earningsBadge}</td>
                     <td class="p-3 text-center">
                         <button class="bg-slate-700 hover:bg-emerald-600 text-white text-[10px] px-2 py-1 rounded transition">
@@ -243,13 +258,13 @@
         function actualizarKPIs() {
             document.getElementById('kpi-total').innerText = datosFiltrados.length;
             
-            const countA = datosFiltrados.filter(i => (i.setup || i.Setup) === 'SETUP_A').length;
-            const countB = datosFiltrados.filter(i => (i.setup || i.Setup) === 'SETUP_B').length;
+            const countA = datosFiltrados.filter(i => i.setup_a).length;
+            const countB = datosFiltrados.filter(i => i.setup_b).length;
             document.getElementById('kpi-setup-a').innerText = countA;
             document.getElementById('kpi-setup-b').innerText = countB;
 
             if (datosFiltrados.length > 0) {
-                const totalADR = datosFiltrados.reduce((acc, curr) => acc + parseFloat(curr.adr_pct !== undefined ? curr.adr_pct : (curr.adr || 0)), 0);
+                const totalADR = datosFiltrados.reduce((acc, curr) => acc + curr.adr, 0);
                 const avgADR = totalADR / datosFiltrados.length;
                 document.getElementById('kpi-adr').innerText = avgADR.toFixed(2) + '%';
             } else {
