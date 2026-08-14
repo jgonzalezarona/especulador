@@ -1,30 +1,30 @@
 {
-  "fecha": "2026-08-14 14:48",
+  "fecha": "2026-08-14 16:14",
   "universo_total": 558,
   "global": {
-    "operaciones": 31975,
+    "operaciones": 31958,
     "acierto_pct": 37.2,
-    "ganancia_media_pct": 7.12,
-    "perdida_media_pct": -3.02,
+    "ganancia_media_pct": 7.13,
+    "perdida_media_pct": -3.03,
     "expectancia_pct": 0.75,
-    "profit_factor": 1.39,
+    "profit_factor": 1.4,
     "dias_medios": 13.9
   },
   "terciles": {
     "ADR bajo": {
-      "operaciones": 11132,
-      "acierto_pct": 37.2,
-      "ganancia_media_pct": 5.04,
-      "perdida_media_pct": -2.38,
+      "operaciones": 11137,
+      "acierto_pct": 37.1,
+      "ganancia_media_pct": 5.05,
+      "perdida_media_pct": -2.39,
       "expectancia_pct": 0.38,
       "profit_factor": 1.25,
       "dias_medios": 13.8,
       "rango_adr": "1.4%–2.3%"
     },
     "ADR medio": {
-      "operaciones": 10625,
+      "operaciones": 10643,
       "acierto_pct": 36.3,
-      "ganancia_media_pct": 6.45,
+      "ganancia_media_pct": 6.44,
       "perdida_media_pct": -2.91,
       "expectancia_pct": 0.49,
       "profit_factor": 1.26,
@@ -32,19 +32,19 @@
       "rango_adr": "2.3%–2.9%"
     },
     "ADR alto": {
-      "operaciones": 10218,
-      "acierto_pct": 38.1,
-      "ganancia_media_pct": 10.0,
-      "perdida_media_pct": -3.85,
-      "expectancia_pct": 1.42,
+      "operaciones": 10178,
+      "acierto_pct": 38.2,
+      "ganancia_media_pct": 10.02,
+      "perdida_media_pct": -3.86,
+      "expectancia_pct": 1.44,
       "profit_factor": 1.6,
       "dias_medios": 14.1,
       "rango_adr": "2.9%–8.8%"
     }
   },
   "comparativa": {
-    "estrategia_mediana": 24.6,
-    "buyhold_mediana": 199.2,
-    "pct_beat_buyhold": 8.6
+    "estrategia_mediana": 24.9,
+    "buyhold_mediana": 200.4,
+    "pct_beat_buyhold": 8.4
   }
 }
