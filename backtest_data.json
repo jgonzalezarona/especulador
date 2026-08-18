@@ -1,50 +1,50 @@
 {
-  "fecha": "2026-08-17 21:49",
-  "universo_total": 560,
+  "fecha": "2026-08-18 09:03",
+  "universo_total": 555,
   "global": {
-    "operaciones": 32025,
-    "acierto_pct": 37.1,
-    "ganancia_media_pct": 7.12,
-    "perdida_media_pct": -3.02,
-    "expectancia_pct": 0.74,
-    "profit_factor": 1.39,
+    "operaciones": 31667,
+    "acierto_pct": 37.2,
+    "ganancia_media_pct": 7.16,
+    "perdida_media_pct": -3.03,
+    "expectancia_pct": 0.76,
+    "profit_factor": 1.4,
     "dias_medios": 13.9
   },
   "terciles": {
     "ADR bajo": {
-      "operaciones": 11172,
-      "acierto_pct": 37.1,
-      "ganancia_media_pct": 5.04,
+      "operaciones": 11053,
+      "acierto_pct": 37.2,
+      "ganancia_media_pct": 5.07,
       "perdida_media_pct": -2.39,
-      "expectancia_pct": 0.36,
-      "profit_factor": 1.24,
+      "expectancia_pct": 0.38,
+      "profit_factor": 1.25,
       "dias_medios": 13.8,
       "rango_adr": "1.4%–2.3%"
     },
     "ADR medio": {
-      "operaciones": 10623,
-      "acierto_pct": 36.3,
-      "ganancia_media_pct": 6.5,
+      "operaciones": 10506,
+      "acierto_pct": 36.4,
+      "ganancia_media_pct": 6.49,
       "perdida_media_pct": -2.91,
-      "expectancia_pct": 0.5,
+      "expectancia_pct": 0.51,
       "profit_factor": 1.27,
       "dias_medios": 13.7,
       "rango_adr": "2.3%–2.9%"
     },
     "ADR alto": {
-      "operaciones": 10230,
-      "acierto_pct": 38.0,
-      "ganancia_media_pct": 9.96,
-      "perdida_media_pct": -3.84,
-      "expectancia_pct": 1.4,
-      "profit_factor": 1.59,
+      "operaciones": 10108,
+      "acierto_pct": 38.1,
+      "ganancia_media_pct": 10.05,
+      "perdida_media_pct": -3.87,
+      "expectancia_pct": 1.44,
+      "profit_factor": 1.6,
       "dias_medios": 14.1,
       "rango_adr": "2.9%–8.8%"
     }
   },
   "comparativa": {
-    "estrategia_mediana": 23.6,
-    "buyhold_mediana": 201.3,
-    "pct_beat_buyhold": 8.6
+    "estrategia_mediana": 24.6,
+    "buyhold_mediana": 206.1,
+    "pct_beat_buyhold": 8.5
   }
 }
