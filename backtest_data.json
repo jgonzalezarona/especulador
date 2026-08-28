@@ -1,18 +1,18 @@
 {
-  "fecha": "2026-08-28 20:18",
+  "fecha": "2026-08-28 23:23",
   "universo_total": 578,
   "global": {
-    "operaciones": 33087,
+    "operaciones": 33086,
     "acierto_pct": 37.1,
     "ganancia_media_pct": 7.15,
-    "perdida_media_pct": -3.02,
+    "perdida_media_pct": -3.03,
     "expectancia_pct": 0.75,
     "profit_factor": 1.39,
     "dias_medios": 13.9
   },
   "terciles": {
     "ADR bajo": {
-      "operaciones": 11558,
+      "operaciones": 11557,
       "acierto_pct": 36.9,
       "ganancia_media_pct": 5.11,
       "perdida_media_pct": -2.39,
