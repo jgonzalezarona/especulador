@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-08-28 03:39",
+  "fecha": "2026-08-28 09:03",
   "universo_total": 578,
   "global": {
     "operaciones": 33078,
@@ -12,27 +12,27 @@
   },
   "terciles": {
     "ADR bajo": {
-      "operaciones": 11550,
+      "operaciones": 11558,
       "acierto_pct": 36.8,
-      "ganancia_media_pct": 5.07,
-      "perdida_media_pct": -2.38,
-      "expectancia_pct": 0.36,
-      "profit_factor": 1.24,
+      "ganancia_media_pct": 5.11,
+      "perdida_media_pct": -2.39,
+      "expectancia_pct": 0.37,
+      "profit_factor": 1.25,
       "dias_medios": 13.8,
       "rango_adr": "1.4%–2.3%"
     },
     "ADR medio": {
-      "operaciones": 10935,
+      "operaciones": 10928,
       "acierto_pct": 36.5,
-      "ganancia_media_pct": 6.5,
-      "perdida_media_pct": -2.93,
-      "expectancia_pct": 0.51,
+      "ganancia_media_pct": 6.46,
+      "perdida_media_pct": -2.92,
+      "expectancia_pct": 0.5,
       "profit_factor": 1.27,
       "dias_medios": 13.7,
       "rango_adr": "2.3%–2.9%"
     },
     "ADR alto": {
-      "operaciones": 10593,
+      "operaciones": 10592,
       "acierto_pct": 37.9,
       "ganancia_media_pct": 10.01,
       "perdida_media_pct": -3.83,
