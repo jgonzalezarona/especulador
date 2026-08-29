@@ -1,8 +1,8 @@
 {
-  "fecha": "2026-08-28 23:23",
+  "fecha": "2026-08-29 03:14",
   "universo_total": 578,
   "global": {
-    "operaciones": 33086,
+    "operaciones": 33087,
     "acierto_pct": 37.1,
     "ganancia_media_pct": 7.15,
     "perdida_media_pct": -3.03,
@@ -22,7 +22,7 @@
       "rango_adr": "1.4%–2.3%"
     },
     "ADR medio": {
-      "operaciones": 10964,
+      "operaciones": 10965,
       "acierto_pct": 36.5,
       "ganancia_media_pct": 6.45,
       "perdida_media_pct": -2.92,
