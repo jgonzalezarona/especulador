@@ -1,8 +1,8 @@
 {
-  "fecha": "2026-09-04 21:38",
+  "fecha": "2026-09-07 14:21",
   "universo_total": 578,
   "global": {
-    "operaciones": 33091,
+    "operaciones": 33089,
     "acierto_pct": 37.0,
     "ganancia_media_pct": 7.14,
     "perdida_media_pct": -3.02,
@@ -12,7 +12,7 @@
   },
   "terciles": {
     "ADR bajo": {
-      "operaciones": 11554,
+      "operaciones": 11556,
       "acierto_pct": 36.9,
       "ganancia_media_pct": 5.11,
       "perdida_media_pct": -2.4,
@@ -22,9 +22,9 @@
       "rango_adr": "1.3%–2.3%"
     },
     "ADR medio": {
-      "operaciones": 10924,
+      "operaciones": 10920,
       "acierto_pct": 36.5,
-      "ganancia_media_pct": 6.43,
+      "ganancia_media_pct": 6.44,
       "perdida_media_pct": -2.92,
       "expectancia_pct": 0.49,
       "profit_factor": 1.27,
