@@ -496,11 +496,11 @@ function earnCell(d){
   return `<span class="${cls}">${d} d</span>`;
 }
 
-// LOGICA VISUAL VCP
+// LOGICA VISUAL VCP (Gotitas acumuladas)
 function vcpCell(d){
   if(!d || d===0) return '<span style="color:var(--dim)">-</span>';
-  if(d>=2) return `<span style="color:var(--blue); font-weight:bold" title="${d} días secos (volumen < 60%)">💧${d}</span>`;
-  return `<span style="color:var(--dim)" title="1 día de secado">💧1</span>`;
+  const drops = "💧".repeat(d);
+  return `<span style="color:var(--blue); font-size:12px; letter-spacing:1px;" title="${d} días consecutivos de secado (VCP)">${drops}</span>`;
 }
 
 function renderTable(){
