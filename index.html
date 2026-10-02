@@ -133,7 +133,7 @@
   .cell{background:var(--panel); padding:10px 12px}
   .cell .k{font-size:10px; text-transform:uppercase; color:var(--dim)}
   .cell .v{font-size:15px; font-weight:600; margin-top:2px}
-  .cell .v.g{color:var(--green)} .cell .v.a{color:var(--amber)} .cell .v.r{color:var(--red)}
+  .cell .v.g{color:var(--green)} .cell .v.a{color:var(--amber)} .cell .v.r{color:var(--red)} .cell .v.b{color:var(--blue)}
   #plan{padding:14px 16px; border-top:1px solid var(--line); font-size:12px; line-height:1.8; color:var(--dim)}
   #plan b{color:var(--amber)}
 
@@ -201,7 +201,10 @@
         <th data-k="ticker">Valor</th><th data-k="market">Mercado</th>
         <th data-k="rs">RS</th><th data-k="adr">ADR%</th>
         <th data-k="pct_under_high52">% vs máx 52s</th><th data-k="burst40d">Impulso</th>
-        <th data-k="setup">Setup</th><th data-k="days_to_earnings">Earnings</th><th>40 sesiones</th>
+        <th data-k="setup">Setup</th>
+        <!-- NUEVA COLUMNA VCP -->
+        <th data-k="dryDays10" title="Días de contracción de volumen (VCP) en las últimas 10 sesiones">VCP 💧</th>
+        <th data-k="days_to_earnings">Earnings</th><th>40 sesiones</th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -461,6 +464,7 @@ function sortAndRender(){
     let va, vb;
     if(k==="setup"){ va=(a.setup_a?2:0)+(a.setup_b?1:0); vb=(b.setup_a?2:0)+(b.setup_b?1:0); }
     else if(k==="days_to_earnings"){ va=a[k]===null?9999:a[k]; vb=b[k]===null?9999:b[k]; }
+    else if(k==="dryDays10"){ va=a[k]||0; vb=b[k]||0; } // Ordenación VCP
     else { va=a[k]; vb=b[k]; }
     if(typeof va==="string") return sortDir*va.localeCompare(vb);
     return sortDir*(va-vb);
@@ -491,6 +495,14 @@ function earnCell(d){
   const cls = d < +CFG.gates.earn.val ? "ern-warn" : "ern-ok";
   return `<span class="${cls}">${d} d</span>`;
 }
+
+// LOGICA VISUAL VCP
+function vcpCell(d){
+  if(!d || d===0) return '<span style="color:var(--dim)">-</span>';
+  if(d>=2) return `<span style="color:var(--blue); font-weight:bold" title="${d} días secos (volumen < 60%)">💧${d}</span>`;
+  return `<span style="color:var(--dim)" title="1 día de secado">💧1</span>`;
+}
+
 function renderTable(){
   const tb = document.getElementById("tbody"); tb.innerHTML="";
   document.getElementById("tbl").hidden = VIEW.length===0 && !DATA;
@@ -504,6 +516,7 @@ function renderTable(){
       <td>${r.rs.toFixed(0)}</td><td>${r.adr.toFixed(1)}</td>
       <td>${r.pct_under_high52.toFixed(1)}%</td><td>+${r.burst40d.toFixed(0)}%</td>
       <td>${r.setup_a?'<span class="badge bA">A rotura</span>':""}${r.setup_b?'<span class="badge bB">B pullback</span>':""}</td>
+      <td>${vcpCell(r.dryDays10)}</td> <!-- CELDA VCP AÑADIDA -->
       <td>${earnCell(r.days_to_earnings)}</td>
       <td>${sparkSVG(r.spark)}</td>`;
     tr.addEventListener("click", ()=>openDetail(r));
@@ -542,11 +555,14 @@ function openDetail(r){
   });
 
   const stopA = (r.pivot*0.95).toFixed(2);
+  const vcpCount = r.dryDays10 || 0;
+  
   const cells = [
     ["Cierre", r.close, ""],
     ["RS", r.rs.toFixed(0), r.rs>=90?"g":"a"],
     ["ADR 20s", r.adr.toFixed(1)+"%", r.adr>=4?"g":""],
     ["EMA10", r.ema10, ""], ["EMA21", r.ema21, ""],
+    ["Días Secos (VCP)", vcpCount + " días", vcpCount>=2?"b":""], // DATO VCP EN EL DETALLE
     ["SMA50", r.sma50, ""],
     ["SMA200", r.sma200, ""],
     ["% vs máx 52s", r.pct_under_high52.toFixed(1)+"%", ""],
@@ -563,7 +579,7 @@ function openDetail(r){
     ${r.setup_a?`<b>Setup A</b> — rotura sobre <b>${r.pivot}</b> con volumen &gt; media 10 ses.
       Stop bajo el mínimo del día de rotura (referencia máx. −5%: ~${stopA}).
       Fallo: cierre bajo el pivote en las 2 primeras sesiones → fuera.<br>`:""}
-    ${r.setup_b?`<b>Setup B</b> — giro sobre EMA10/21 (${r.ema10} / ${r.ema21}):
+    ${r.setup_b?`<b>Setup B</b> — giro sobre EMA10/21 (${r.ema10} /${r.ema21}):
       entrada al superar el máximo del día anterior, stop en el mínimo del retroceso.<br>`:""}
     ${!r.setup_a&&!r.setup_b?"Sin setup activo — pasa el embudo pero aún no hay gatillo.<br>":""}
     Riesgo por operación: 0,5–1% del capital. Ratio mínimo 2:1 o no hay trade.`;
