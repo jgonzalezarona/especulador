@@ -334,22 +334,29 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
     # -------------------------------------------------------------
     dry_days = 0
     if len(v) >= 50 and len(c) >= 11:
-        # Seleccionamos los últimos 10 días de volumen
         v_last10 = v.iloc[-10:]
-        # Calculamos la media de 50 sesiones para cada uno de esos 10 días
         v_ma50 = v.rolling(50).mean().iloc[-10:]
-        # Calculamos el Ratio de Volumen para esos 10 días
         rel_vols = v_last10 / v_ma50
-        
-        # Calculamos la variación absoluta diaria del cierre
         ret_last10 = c.iloc[-11:].pct_change().dropna().abs()
         
         for i in range(len(rel_vols)):
-            # REGLA DE CONTRACCIÓN MINERVINI:
-            # 1. Volumen Relativo menor al 60% (0.6)
-            # 2. Cierre diario apenas se mueve (variación menor al 1.5% o 0.015)
             if rel_vols.iloc[i] < 0.6 and ret_last10.iloc[i] < 0.015:
                 dry_days += 1
+    # -------------------------------------------------------------
+
+    # -------------------------------------------------------------
+    # MÉTRICA SÓLIDA DE DISTRIBUCIÓN INSTITUCIONAL (Ventana de 15 sesiones)
+    # -------------------------------------------------------------
+    heavy_days_count = 0
+    if len(v) >= 50 and len(c) >= 15:
+        v_last15 = v.iloc[-15:]
+        v_ma50_15 = v.rolling(50).mean().iloc[-15:]
+        rel_vols_15 = v_last15 / v_ma50_15
+        ret_last15 = c.iloc[-16:].pct_change().dropna()
+        
+        for i in range(len(rel_vols_15)):
+            if rel_vols_15.iloc[i] > 1.3 and ret_last15.iloc[i] < -0.01:
+                heavy_days_count += 1
     # -------------------------------------------------------------
 
     return {
@@ -365,7 +372,8 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         "adr": round(adr, 2),
         "dollar_vol": round(dollar_vol),
         "burst40d": round(burst, 1),
-        "dryDays10": int(dry_days), # <--- AÑADIDO AL JSON DE SALIDA
+        "dryDays10": int(dry_days),
+        "heavyDays10": int(heavy_days_count), # <--- MÉTRICA DE DISTRIBUCIÓN AÑADIDA
         "rs_raw": rs_raw,
         "setup_a": setup_a,
         "setup_b": setup_b,
