@@ -329,6 +329,29 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         and vol_drying
     )
 
+    # -------------------------------------------------------------
+    # INYECCIÓN DEL SETUP VCP: Cálculo de Días Secos (10 días)
+    # -------------------------------------------------------------
+    dry_days = 0
+    if len(v) >= 50 and len(c) >= 11:
+        # Seleccionamos los últimos 10 días de volumen
+        v_last10 = v.iloc[-10:]
+        # Calculamos la media de 50 sesiones para cada uno de esos 10 días
+        v_ma50 = v.rolling(50).mean().iloc[-10:]
+        # Calculamos el Ratio de Volumen para esos 10 días
+        rel_vols = v_last10 / v_ma50
+        
+        # Calculamos la variación absoluta diaria del cierre
+        ret_last10 = c.iloc[-11:].pct_change().dropna().abs()
+        
+        for i in range(len(rel_vols)):
+            # REGLA DE CONTRACCIÓN MINERVINI:
+            # 1. Volumen Relativo menor al 60% (0.6)
+            # 2. Cierre diario apenas se mueve (variación menor al 1.5% o 0.015)
+            if rel_vols.iloc[i] < 0.6 and ret_last10.iloc[i] < 0.015:
+                dry_days += 1
+    # -------------------------------------------------------------
+
     return {
         "close": round(last, 2),
         "sma50": round(float(sma50.iloc[-1]), 2),
@@ -342,6 +365,7 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         "adr": round(adr, 2),
         "dollar_vol": round(dollar_vol),
         "burst40d": round(burst, 1),
+        "dryDays10": int(dry_days), # <--- AÑADIDO AL JSON DE SALIDA
         "rs_raw": rs_raw,
         "setup_a": setup_a,
         "setup_b": setup_b,
