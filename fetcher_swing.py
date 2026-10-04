@@ -32,134 +32,29 @@ WIKI = {
 }
 
 FALLBACK_IBEX35 = [
-    "ACS.MC",
-    "ACX.MC",
-    "AENA.MC",
-    "AMS.MC",
-    "ANA.MC",
-    "ANE.MC",
-    "BBVA.MC",
-    "BKT.MC",
-    "CABK.MC",
-    "CLNX.MC",
-    "COL.MC",
-    "ELE.MC",
-    "ENG.MC",
-    "FDR.MC",
-    "FER.MC",
-    "GRF.MC",
-    "IAG.MC",
-    "IBE.MC",
-    "IDR.MC",
-    "ITX.MC",
-    "LOG.MC",
-    "MAP.MC",
-    "MRL.MC",
-    "MTS.MC",
-    "NTGY.MC",
-    "PUIG.MC",
-    "RED.MC",
-    "REP.MC",
-    "ROVI.MC",
-    "SAB.MC",
-    "SAN.MC",
-    "SCYR.MC",
-    "SLR.MC",
-    "TEF.MC",
-    "UNI.MC",
+    "ACS.MC", "ACX.MC", "AENA.MC", "AMS.MC", "ANA.MC", "ANE.MC", "BBVA.MC",
+    "BKT.MC", "CABK.MC", "CLNX.MC", "COL.MC", "ELE.MC", "ENG.MC", "FDR.MC",
+    "FER.MC", "GRF.MC", "IAG.MC", "IBE.MC", "IDR.MC", "ITX.MC", "LOG.MC",
+    "MAP.MC", "MRL.MC", "MTS.MC", "NTGY.MC", "PUIG.MC", "RED.MC", "REP.MC",
+    "ROVI.MC", "SAB.MC", "SAN.MC", "SCYR.MC", "SLR.MC", "TEF.MC", "UNI.MC",
 ]
 
 FALLBACK_NDX = [
-    "NVDA",
-    "AAPL",
-    "MSFT",
-    "AMZN",
-    "META",
-    "GOOGL",
-    "GOOG",
-    "TSLA",
-    "AVGO",
-    "COST",
-    "ASML",
-    "NFLX",
-    "AMD",
-    "AZN",
-    "PEP",
-    "LIN",
-    "TMUS",
-    "ADBE",
-    "CSCO",
-    "PDD",
-    "TXN",
-    "QCOM",
-    "AMAT",
-    "CMCSA",
-    "INTU",
-    "AMGN",
-    "ISRG",
-    "HON",
-    "BKNG",
-    "VRTX",
-    "ADP",
-    "REGN",
-    "PANW",
-    "MDLZ",
-    "MU",
-    "LRCX",
-    "ADI",
-    "MELI",
-    "KLAC",
-    "GILD",
-    "SNPS",
-    "CDNS",
-    "CRWD",
-    "INTC",
-    "ORLY",
-    "CSX",
-    "MAR",
-    "CTAS",
-    "PYPL",
-    "ABNB",
+    "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "GOOG", "TSLA", "AVGO",
+    "COST", "ASML", "NFLX", "AMD", "AZN", "PEP", "LIN", "TMUS", "ADBE",
+    "CSCO", "PDD", "TXN", "QCOM", "AMAT", "CMCSA", "INTU", "AMGN", "ISRG",
+    "HON", "BKNG", "VRTX", "ADP", "REGN", "PANW", "MDLZ", "MU", "LRCX",
+    "ADI", "MELI", "KLAC", "GILD", "SNPS", "CDNS", "CRWD", "INTC", "ORLY",
+    "CSX", "MAR", "CTAS", "PYPL", "ABNB",
 ]
 
 FALLBACK_DAX40 = [
-    "ADS.DE",
-    "AIR.DE",
-    "ALV.DE",
-    "BAS.DE",
-    "BAYN.DE",
-    "BEI.DE",
-    "BMW.DE",
-    "BNR.DE",
-    "CBK.DE",
-    "CON.DE",
-    "1COV.DE",
-    "DTG.DE",
-    "DB1.DE",
-    "DBK.DE",
-    "DHL.DE",
-    "DTE.DE",
-    "EOAN.DE",
-    "FRE.DE",
-    "HEI.DE",
-    "HEN3.DE",
-    "HNR1.DE",
-    "IFX.DE",
-    "MBG.DE",
-    "MRK.DE",
-    "MTX.DE",
-    "MUV2.DE",
-    "PPA.DE",
-    "RHM.DE",
-    "RWE.DE",
-    "SAP.DE",
-    "SRT3.DE",
-    "SIE.DE",
-    "ENR.DE",
-    "SY1.DE",
-    "VOW3.DE",
-    "VNA.DE",
-    "ZAL.DE",
+    "ADS.DE", "AIR.DE", "ALV.DE", "BAS.DE", "BAYN.DE", "BEI.DE", "BMW.DE",
+    "BNR.DE", "CBK.DE", "CON.DE", "1COV.DE", "DTG.DE", "DB1.DE", "DBK.DE",
+    "DHL.DE", "DTE.DE", "EOAN.DE", "FRE.DE", "HEI.DE", "HEN3.DE", "HNR1.DE",
+    "IFX.DE", "MBG.DE", "MRK.DE", "MTX.DE", "MUV2.DE", "PPA.DE", "RHM.DE",
+    "RWE.DE", "SAP.DE", "SRT3.DE", "SIE.DE", "ENR.DE", "SY1.DE", "VOW3.DE",
+    "VNA.DE", "ZAL.DE",
 ]
 
 
@@ -175,7 +70,6 @@ def _clean_symbol(sym: str, market: str) -> str:
 
 
 def get_universe() -> dict:
-    """Devuelve {ticker: market}. Un ticker en varios índices conserva el primero."""
     universe = {}
     headers = {
         "User-Agent": (
@@ -201,7 +95,6 @@ def get_universe() -> dict:
         except Exception as e:
             print(f"[AVISO] Wikipedia falló para {market}: {e}")
 
-        # Fallbacks si Wikipedia no responde
         if not symbols:
             if market == "IBEX35":
                 symbols = FALLBACK_IBEX35
@@ -210,7 +103,7 @@ def get_universe() -> dict:
             elif market == "DAX40":
                 symbols = FALLBACK_DAX40
             elif market == "SP500":
-                symbols = FALLBACK_NDX  # Se usa la lista US principal si falla el S&P 500 completo
+                symbols = FALLBACK_NDX
 
             print(f"[AVISO] Usando lista de respaldo para {market}")
 
@@ -220,13 +113,7 @@ def get_universe() -> dict:
     return universe
 
 
-# ----------------------------------------------------------------------------
-# 2. DESCARGA DE VELAS DIARIAS
-# ----------------------------------------------------------------------------
-
-
 def download_history(tickers, period="2y"):
-    """Descarga en bloque. Devuelve dict ticker -> DataFrame OHLCV."""
     print(f"Descargando {len(tickers)} tickers…")
     data = yf.download(
         tickers=list(tickers),
@@ -254,17 +141,68 @@ def download_history(tickers, period="2y"):
     return out
 
 
-# ----------------------------------------------------------------------------
-# 3. INDICADORES Y SETUPS
-# ----------------------------------------------------------------------------
-
-
 def sma(s, n):
     return s.rolling(n).mean()
 
 
 def ema(s, n):
     return s.ewm(span=n, adjust=False).mean()
+
+
+def calc_trend_exhaustion(close, volume):
+    """
+    SISTEMA UNIFICADO GENERAL DE ALERTA DE AGOTAMIENTO Y DISTRIBUCIÓN
+    -----------------------------------------------------------------
+    Evalúa 4 patrones institucionales sin esperar a caídas graves (-15%)
+    ni saltar por pequeñas pausas de consolidación (-1%).
+    """
+    if close is None or volume is None or len(close) < 60:
+        return 0
+
+    c = close
+    v = volume
+    vol_ma50 = v.rolling(50).mean()
+    ema21 = c.ewm(span=21, adjust=False).mean()
+    hi52 = c.rolling(252, min_periods=60).max()
+
+    rets = c.pct_change()
+    rel_vol = v / vol_ma50
+
+    # 1. CLÚSTER DE DISTRIBUCIÓN: Días de caída >= 0.8% con Volumen > 1.25x MA50 en 15 sesiones
+    dist_days_15 = int(((rets <= -0.008) & (rel_vol > 1.25)).iloc[-15:].sum())
+
+    # 2. CHURNING / ESTANCAMIENTO: Volumen > 1.5x pero precio plano (-0.5% a +0.3%) cerca de máximos (>= 92% de 52w)
+    near_highs = (c / hi52) >= 0.92
+    stalling_days = int(((rets >= -0.005) & (rets <= 0.003) & (rel_vol > 1.5) & near_highs).iloc[-10:].sum())
+
+    # 3. AGOTAMIENTO CLIMÁTICO: Precio extendido > 18% sobre EMA21 con volumen alto (> 1.8x)
+    ext_ema21 = (c / ema21) - 1.0
+    climax_exhaustion = 1 if (ext_ema21.iloc[-1] > 0.18 and rel_vol.iloc[-1] > 1.8) else 0
+
+    # 4. PÉRDIDA DE CARÁCTER: Cierre por debajo de la EMA21 con volumen institucional (> 1.3x)
+    character_loss = 1 if (c.iloc[-1] < ema21.iloc[-1] and rel_vol.iloc[-1] > 1.3) else 0
+
+    # --- PONDERACIÓN DEL SCORE DE SALIDA ---
+    score = 0
+    if dist_days_15 >= 3:
+        score += 2
+    elif dist_days_15 == 2:
+        score += 1
+
+    if stalling_days >= 2:
+        score += 1
+
+    if climax_exhaustion:
+        score += 1
+
+    if character_loss:
+        score += 1
+
+    # ANULACIÓN POR ABSORCIÓN: Si la última sesión es un fuerte rebote alcista (> +2.0%), la distribución se neutraliza
+    if rets.iloc[-1] > 0.020:
+        score = max(0, score - 2)
+
+    return min(4, score)
 
 
 def compute_metrics(df: pd.DataFrame) -> dict | None:
@@ -295,10 +233,10 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
     roll_min = c.rolling(40).min()
     burst = float(((c / roll_min - 1).iloc[-252:].max()) * 100)
 
-    def ret(n):
+    def ret_func(n):
         return float(c.iloc[-1] / c.iloc[-n] - 1) if len(c) > n else 0.0
 
-    rs_raw = 0.4 * ret(63) + 0.2 * ret(126) + 0.2 * ret(189) + 0.2 * ret(252)
+    rs_raw = 0.4 * ret_func(63) + 0.2 * ret_func(126) + 0.2 * ret_func(189) + 0.2 * ret_func(252)
 
     hi13w = float(h.iloc[-65:].max())
     rng_last10 = float(h.iloc[-10:].max() / l.iloc[-10:].min() - 1)
@@ -329,8 +267,8 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         and vol_drying
     )
 
-  # -------------------------------------------------------------
-    # CÁLCULO DE DÍAS SECOS (UNIFICADO VCP)
+    # -------------------------------------------------------------
+    # CÁLCULO DE DÍAS SECOS UNIFICADO (Volumen < 0.55 y Rango < 0.012)
     # -------------------------------------------------------------
     dry_days = 0
     if len(v) >= 50 and len(c) >= 11:
@@ -342,25 +280,11 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         for i in range(len(rel_vols)):
             if rel_vols.iloc[i] < 0.55 and ret_last10.iloc[i] < 0.012:
                 dry_days += 1
-    # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    # MÉTRICA DE DISTRIBUCIÓN INSTITUCIONAL (UNIFICADA)
+    # MÉTRICA UNIFICADA DE DISTRIBUCIÓN / AGOTAMIENTO INSTITUCIONAL
     # -------------------------------------------------------------
-    heavy_days_count = 0
-    if len(v) >= 50 and len(c) >= 13:
-        # Si la última sesión es un rebote alcista fuerte (> +1.5%), la distribución se anula
-        last_ret = (c.iloc[-1] / c.iloc[-2]) - 1.0 if len(c) >= 2 else 0.0
-        if last_ret <= 0.015:
-            v_last12 = v.iloc[-12:]
-            v_ma50_12 = v.rolling(50).mean().iloc[-12:]
-            rel_vols_12 = v_last12 / v_ma50_12
-            ret_last12 = c.iloc[-13:].pct_change().dropna()
-            
-            for i in range(len(rel_vols_12)):
-                if rel_vols_12.iloc[i] > 1.3 and ret_last12.iloc[i] <= -0.008:
-                    heavy_days_count += 1
-    # -------------------------------------------------------------
+    heavy_days_count = calc_trend_exhaustion(c, v)
 
     return {
         "close": round(last, 2),
@@ -376,7 +300,7 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         "dollar_vol": round(dollar_vol),
         "burst40d": round(burst, 1),
         "dryDays10": int(dry_days),
-        "heavyDays10": int(heavy_days_count), # <--- MÉTRICA DE DISTRIBUCIÓN AÑADIDA
+        "heavyDays10": int(heavy_days_count),
         "rs_raw": rs_raw,
         "setup_a": setup_a,
         "setup_b": setup_b,
