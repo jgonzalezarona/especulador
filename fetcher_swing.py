@@ -329,8 +329,8 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         and vol_drying
     )
 
-    # -------------------------------------------------------------
-    # INYECCIÓN DEL SETUP VCP: Cálculo de Días Secos (10 días)
+  # -------------------------------------------------------------
+    # CÁLCULO DE DÍAS SECOS (UNIFICADO VCP)
     # -------------------------------------------------------------
     dry_days = 0
     if len(v) >= 50 and len(c) >= 11:
@@ -340,23 +340,26 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         ret_last10 = c.iloc[-11:].pct_change().dropna().abs()
         
         for i in range(len(rel_vols)):
-            if rel_vols.iloc[i] < 0.6 and ret_last10.iloc[i] < 0.015:
+            if rel_vols.iloc[i] < 0.55 and ret_last10.iloc[i] < 0.012:
                 dry_days += 1
     # -------------------------------------------------------------
 
     # -------------------------------------------------------------
-    # MÉTRICA SÓLIDA DE DISTRIBUCIÓN INSTITUCIONAL (Ventana de 15 sesiones)
+    # MÉTRICA DE DISTRIBUCIÓN INSTITUCIONAL (UNIFICADA)
     # -------------------------------------------------------------
     heavy_days_count = 0
-    if len(v) >= 50 and len(c) >= 15:
-        v_last15 = v.iloc[-15:]
-        v_ma50_15 = v.rolling(50).mean().iloc[-15:]
-        rel_vols_15 = v_last15 / v_ma50_15
-        ret_last15 = c.iloc[-16:].pct_change().dropna()
-        
-        for i in range(len(rel_vols_15)):
-            if rel_vols_15.iloc[i] > 1.3 and ret_last15.iloc[i] < -0.01:
-                heavy_days_count += 1
+    if len(v) >= 50 and len(c) >= 13:
+        # Si la última sesión es un rebote alcista fuerte (> +1.5%), la distribución se anula
+        last_ret = (c.iloc[-1] / c.iloc[-2]) - 1.0 if len(c) >= 2 else 0.0
+        if last_ret <= 0.015:
+            v_last12 = v.iloc[-12:]
+            v_ma50_12 = v.rolling(50).mean().iloc[-12:]
+            rel_vols_12 = v_last12 / v_ma50_12
+            ret_last12 = c.iloc[-13:].pct_change().dropna()
+            
+            for i in range(len(rel_vols_12)):
+                if rel_vols_12.iloc[i] > 1.3 and ret_last12.iloc[i] <= -0.008:
+                    heavy_days_count += 1
     # -------------------------------------------------------------
 
     return {
