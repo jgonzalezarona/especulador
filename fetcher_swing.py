@@ -159,8 +159,11 @@ def calc_trend_exhaustion(close, volume):
     if close is None or volume is None or len(close) < 60:
         return 0
 
-    c = close
-    v = volume
+    c = close.dropna()
+    v = volume.reindex(c.index).dropna()
+    if len(c) < 60:
+        return 0
+
     vol_ma50 = v.rolling(50).mean()
     ema21 = c.ewm(span=21, adjust=False).mean()
     hi52 = c.rolling(252, min_periods=60).max()
@@ -199,7 +202,7 @@ def calc_trend_exhaustion(close, volume):
         score += 1
 
     # ANULACIÓN POR ABSORCIÓN: Si la última sesión es un fuerte rebote alcista (> +2.0%), la distribución se neutraliza
-    if rets.iloc[-1] > 0.020:
+    if len(rets) > 0 and rets.iloc[-1] > 0.020:
         score = max(0, score - 2)
 
     return min(4, score)
@@ -233,10 +236,10 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
     roll_min = c.rolling(40).min()
     burst = float(((c / roll_min - 1).iloc[-252:].max()) * 100)
 
-    def ret_func(n):
+    def ret(n):
         return float(c.iloc[-1] / c.iloc[-n] - 1) if len(c) > n else 0.0
 
-    rs_raw = 0.4 * ret_func(63) + 0.2 * ret_func(126) + 0.2 * ret_func(189) + 0.2 * ret_func(252)
+    rs_raw = 0.4 * ret(63) + 0.2 * ret(126) + 0.2 * ret(189) + 0.2 * ret(252)
 
     hi13w = float(h.iloc[-65:].max())
     rng_last10 = float(h.iloc[-10:].max() / l.iloc[-10:].min() - 1)
@@ -300,7 +303,7 @@ def compute_metrics(df: pd.DataFrame) -> dict | None:
         "dollar_vol": round(dollar_vol),
         "burst40d": round(burst, 1),
         "dryDays10": int(dry_days),
-        "heavyDays10": int(heavy_days_count),
+        "heavyDays10": int(heavy_days_count), # Gotas rojas unificadas (0 a 4)
         "rs_raw": rs_raw,
         "setup_a": setup_a,
         "setup_b": setup_b,
