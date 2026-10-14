@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-10-14 18:18",
+  "fecha": "2026-10-14 19:33",
   "universo_total": 578,
   "global": {
     "operaciones": 32997,
@@ -34,7 +34,7 @@
     "ADR alto": {
       "operaciones": 10525,
       "acierto_pct": 37.7,
-      "ganancia_media_pct": 9.99,
+      "ganancia_media_pct": 9.98,
       "perdida_media_pct": -3.84,
       "expectancia_pct": 1.37,
       "profit_factor": 1.57,
@@ -44,7 +44,7 @@
   },
   "comparativa": {
     "estrategia_mediana": 21.1,
-    "buyhold_mediana": 202.6,
-    "pct_beat_buyhold": 8.8
+    "buyhold_mediana": 201.6,
+    "pct_beat_buyhold": 9.0
   }
 }
