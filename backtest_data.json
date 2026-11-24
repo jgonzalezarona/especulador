@@ -1,8 +1,8 @@
 {
-  "fecha": "2026-11-24 19:38",
+  "fecha": "2026-11-24 23:22",
   "universo_total": 578,
   "global": {
-    "operaciones": 33059,
+    "operaciones": 33061,
     "acierto_pct": 36.9,
     "ganancia_media_pct": 7.15,
     "perdida_media_pct": -3.06,
@@ -12,7 +12,7 @@
   },
   "terciles": {
     "ADR bajo": {
-      "operaciones": 11588,
+      "operaciones": 11586,
       "acierto_pct": 36.8,
       "ganancia_media_pct": 5.0,
       "perdida_media_pct": -2.41,
@@ -32,7 +32,7 @@
       "rango_adr": "2.4%–3.0%"
     },
     "ADR alto": {
-      "operaciones": 10524,
+      "operaciones": 10528,
       "acierto_pct": 37.7,
       "ganancia_media_pct": 10.05,
       "perdida_media_pct": -3.9,
