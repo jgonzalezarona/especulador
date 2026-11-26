@@ -1,8 +1,8 @@
 {
-  "fecha": "2026-11-26 18:32",
+  "fecha": "2026-11-26 22:47",
   "universo_total": 578,
   "global": {
-    "operaciones": 33058,
+    "operaciones": 33061,
     "acierto_pct": 37.0,
     "ganancia_media_pct": 7.15,
     "perdida_media_pct": -3.06,
@@ -22,9 +22,9 @@
       "rango_adr": "1.0%–2.4%"
     },
     "ADR medio": {
-      "operaciones": 10942,
+      "operaciones": 10943,
       "acierto_pct": 36.5,
-      "ganancia_media_pct": 6.58,
+      "ganancia_media_pct": 6.57,
       "perdida_media_pct": -2.95,
       "expectancia_pct": 0.52,
       "profit_factor": 1.28,
@@ -32,7 +32,7 @@
       "rango_adr": "2.4%–3.0%"
     },
     "ADR alto": {
-      "operaciones": 10525,
+      "operaciones": 10527,
       "acierto_pct": 37.7,
       "ganancia_media_pct": 10.05,
       "perdida_media_pct": -3.9,
